@@ -1,0 +1,220 @@
+[data-wm-plugin="tabs"] {
+  position: relative;
+  /*Hover State*/
+  /*Active State*/
+}
+
+[data-wm-plugin="tabs"] header {
+  position: relative;
+  margin-bottom: 8px;
+  padding-bottom: var(--header-padding-bottom, 0px);
+}
+
+[data-wm-plugin="tabs"] nav {
+  display: flex;
+  position: relative;
+  max-width: var(--sqs-site-max-width);
+  margin: auto;
+  padding: var(--nav-padding-top, 0px) 2vw var(--nav-padding-bottom, 0px);
+  justify-content: var(--button-alignment, start);
+  border-bottom-width: var(--nav-bottom-border-width, 0px);
+  border-bottom-style: var(--nav-bottom-border-style, solid);
+  border-bottom-color: var(--nav-bottom-border-color, currentColor);
+  overflow: auto;
+  z-index: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+@media (max-width: 767px) {
+  [data-wm-plugin="tabs"] nav {
+    padding: 0 6vw;
+  }
+}
+[data-wm-plugin="tabs"] header .border-bottom {
+  max-width: var(--sqs-site-max-width);
+  margin: auto;
+  height: 2px;
+  position: absolute;
+  bottom: 0;
+  left: 2vw;
+  right: 2vw;
+  background: black;
+}
+
+/* For Chrome, Safari, and newer versions of Edge */
+[data-wm-plugin="tabs"] nav::-webkit-scrollbar {
+  display: none;
+}
+
+[data-wm-plugin="tabs"] nav button {
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-right: var(--button-spacing, 8px);
+  background-color: var(--button-background, unset);
+  border-width: var(--button-border-width, 1px);
+  border-color: var(--button-border-color, currentColor);
+  border-style: var(--button-border-style, solid);
+  padding: var(--button-padding-v, 4px) var(--button-padding-h, 16px);
+  border-radius: var(--button-border-radius, 0px);
+  font-size: var(--button-font-size, inherit);
+  font-weight: var(--button-font-weight, initial);
+  letter-spacing: var(--button-letter-spacing, initial);
+  color: var(--button-color, currentColor);
+}
+[data-wm-plugin="tabs"] nav button:last-of-type {
+  margin-right: 0px;
+}
+[data-wm-plugin="tabs"] header .scroll-left,
+[data-wm-plugin="tabs"] header .scroll-right {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 100%;
+  width: var(--scroll-icon-size, 25px);
+  cursor: pointer;
+  z-index: 2;
+  opacity: 1;
+  visibility: visibile;
+}
+[data-wm-plugin="tabs"] header .scroll-left {
+  left: 0;
+}
+[data-wm-plugin="tabs"] header .scroll-right {
+  right: 0;
+}
+
+[data-wm-plugin="tabs"] section.tabs-wrapper {
+  padding-top: 8px;
+  position: relative;
+  display: flex;
+  overflow: hidden;
+}
+[data-wm-plugin="tabs"] > section > article {
+  animation: animateOutDown 0.3s ease forwards;
+  position: relative;
+  z-index: 0;
+  flex-shrink: 0;
+  flex-grow: 1;
+  width: 100%;
+  align-self: start;
+}
+[data-wm-plugin="tabs"] > section .tab-content-wrapper {
+  position: relative;
+}
+[data-wm-plugin="tabs"] > section .tab-content-wrapper > * {
+}
+
+/* Hover State */
+[data-wm-plugin="tabs"] button:hover {
+  font-weight: var(
+    --hover-button-font-weight,
+    var(--button-font-weight, initial)
+  );
+  color: var(--hover-button-color, var(--button-color, currentColor));
+  background-color: var(
+    --hover-button-background,
+    var(--button-background, unset)
+  );
+  border-width: var(
+    --hover-button-border-width,
+    var(--button-border-width, 1px)
+  );
+  border-color: var(
+    --hover-button-border-color,
+    var(--button-border-color, currentColor)
+  );
+  border-style: var(
+    --hover-button-border-style,
+    var(--button-border-style, solid)
+  );
+}
+
+/* Active State */
+[data-wm-plugin="tabs"] button.active {
+  font-weight: var(
+    --active-button-font-weight,
+    var(--button-font-weight, initial) 3
+  );
+  color: var(--active-button-color, var(--button-color, currentColor));
+  background-color: var(
+    --active-button-background,
+    var(--button-background, unset)
+  );
+  border-width: var(
+    --active-button-border-width,
+    var(--button-border-width, 1px)
+  );
+  border-color: var(
+    --active-button-border-color,
+    var(--button-border-color, currentColor)
+  );
+  border-style: var(
+    --active-button-border-style,
+    var(--button-border-style, solid)
+  );
+}
+[data-wm-plugin="tabs"] article.active {
+  animation: animateInDown 0.3s ease forwards;
+  z-index: 1;
+}
+[data-wm-plugin="tabs"] article.active .tab-content-wrapper > * {
+  animation: animateInDown 0.3s ease forwards;
+}
+
+/* Nav Scroll */
+[data-wm-plugin="tabs"] header .scroll-left.hide,
+[data-wm-plugin="tabs"] header .scroll-right.hide {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* SQS Reset */
+[data-wm-plugin="tabs"] .sqs-block {
+  box-sizing: border-box;
+}
+[data-wm-plugin="tabs"] .sqs-layout.sqs-grid-12 > .sqs-row {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+/* Animations */
+@keyframes animateInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}
+@keyframes animateOutDown {
+  from {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
+
+/*Styles - Pill*/
+[data-wm-plugin="tabs"][data-style="pills"] {
+  --header-padding-bottom: 8px;
+  --nav-padding-bottom: 8px;
+
+  --button-background: var(--backgroundOverlayColor);
+  --button-border-width: 1px;
+  --button-border-radius: 5px;
+
+  --hover-button-background: hsla(var(--darkAccent-hsl), 0.1);
+
+  --active-button-background: hsla(var(--darkAccent-hsl), 1);
+  --active-button-color: hsla(var(--white-hsl), 1);
+  --active-button-border-width: 1px;
+  --active-button-border-color: hsla(var(--darkAccent-hsl), 0.5);
+}
