@@ -1,5 +1,3 @@
-
-
 class wmTabs {
   static pluginTitle = "wmTabs";
   static isEditModeEventListenerSet = false;
@@ -12,7 +10,7 @@ class wmTabs {
     triggerEvent: "click",
     stickyNav: false,
     stickyNavThrottle: 100,
-    selectStickyNavOffset: 17,
+    stickyNavOffset: 17,
     scrollBackOffset: 150,
     scrollBackBehavior: "auto",
     overflowIndicatorAction: "scroll",
@@ -46,17 +44,15 @@ class wmTabs {
     },
     isSectionsAdjusted: false,
     hooks: {
-      beforeInit: [
-      ],
+      beforeInit: [],
       afterInit: [
-        function() {
+        function () {
           wm$.initializeAllPlugins();
-          window.wmTabs.init();
-        }
+        },
       ],
       beforeOpenTab: [],
-      afterOpenTab: []
-    }
+      afterOpenTab: [],
+    },
   };
   static get userSettings() {
     return window[wmTabs.pluginTitle + "Settings"] || {};
@@ -91,7 +87,7 @@ class wmTabs {
     this.init();
   }
   async init() {
-    this.runHooks('beforeInit');
+    this.runHooks("beforeInit");
     this.el.dataset.navigationType = this.getNavigationType();
     this.buildStructure();
     if (this.source) {
@@ -139,8 +135,7 @@ class wmTabs {
       this.setTabHeights();
       this.removeGlobalAnimations();
     }, 650);
-    this.runHooks('afterInit');
-    console.log(this.settings.hooks.afterInit)
+    this.runHooks("afterInit");
   }
   bindEvents() {
     this.addTabClickEvent();
@@ -460,27 +455,20 @@ class wmTabs {
   addStickyNavScrollEvent() {
     if (this.settings.stickyNav) {
       this.elements.pageHeader = document.querySelector("#header");
+      this.el.style.setProperty("--top-offset", this.settings.stickyNavOffset + "px" );
 
       const onScroll = () => {
         const rect = this.el.getBoundingClientRect();
-        rect.top <= this.settings.selectStickyNavOffset
-          ? this.el.classList.add("is-sticky")
-          : this.el.classList.remove("is-sticky");
 
         if (this.tweaks["tweak-fixed-header"] === "true") {
-          const headerBottom =
-            this.elements.pageHeader.getBoundingClientRect().bottom;
-          this.elements.header?.style.setProperty("top", headerBottom + "px");
-          this.elements.selectNavigationContainer?.style.setProperty(
-            "top",
-            headerBottom + this.settings.selectStickyNavOffset +  "px"
-          );
+          const headerBottom = this.elements.pageHeader.getBoundingClientRect().bottom;
+          const offsetAmt = this.settings.stickyNavOffset + headerBottom;
+          rect.top <= offsetAmt ? this.el.classList.add("is-sticky") : this.el.classList.remove("is-sticky");
+
+          this.el.style.setProperty("--nav-sticky-offset", headerBottom + "px" );
         } else {
-          this.elements.header?.style.setProperty("top", "0px");
-          this.elements.selectNavigationContainer?.style.setProperty(
-            "top",
-            this.settings.selectStickyNavOffset + "px"
-          );
+          rect.top <= this.settings.stickyNavOffset ? this.el.classList.add("is-sticky") : this.el.classList.remove("is-sticky");
+          this.el.style.setProperty("--nav-sticky-offset", "0px");
         }
       };
 
@@ -986,20 +974,23 @@ class wmTabs {
   }
   setTabHeights() {
     const setHeight = () => {
-      this.elements.tabsContentWrapper.style.height = this.activeTab.content.clientHeight + "px";
+      this.elements.tabsContentWrapper.style.height =
+        this.activeTab.content.clientHeight + "px";
       if (this.el.parentElement.closest('[data-wm-plugin="tabs"]')) {
-        this.el.parentElement.closest('[data-wm-plugin="tabs"]')?.wmTabs?.setTabHeights()
+        this.el.parentElement
+          .closest('[data-wm-plugin="tabs"]')
+          ?.wmTabs?.setTabHeights();
       }
-    }
+    };
     if (
       this.navigationType === "horizontal" ||
       this.navigationType === "vertical" ||
       this.navigationType === "select"
     ) {
-      setHeight()
-      
+      setHeight();
+
       window.setTimeout(() => {
-        setHeight()
+        setHeight();
       }, 650);
     }
   }
@@ -1065,7 +1056,7 @@ class wmTabs {
     };
 
     this.el.querySelectorAll('a[href="#next_tab"]').forEach(btn => {
-      btn.setAttribute('href', 'javascript:void(0)');
+      btn.setAttribute("href", "javascript:void(0)");
       btn.addEventListener("click", handleNextClick, {once: true});
       btn.addEventListener("keydown", event => {
         if (event.key === "Enter" || event.key === " ") {
@@ -1076,7 +1067,7 @@ class wmTabs {
     });
 
     this.el.querySelectorAll('a[href="#prev_tab"]').forEach(btn => {
-      btn.setAttribute('href', 'javascript:void(0)');
+      btn.setAttribute("href", "javascript:void(0)");
       btn.addEventListener("click", handlePrevClick, {once: true});
       btn.addEventListener("keydown", event => {
         if (event.key === "Enter" || event.key === " ") {
@@ -1107,7 +1098,7 @@ class wmTabs {
     this.openTab(this.tabs[prevIndex].id);
   }
   openTab(tabId) {
-    this.runHooks('beforeOpenTab', tabId);
+    this.runHooks("beforeOpenTab", tabId);
 
     const activeTab = this.tabs.filter(tab => tab.id === tabId)[0];
     if (!activeTab) console.debug("No Tab!");
@@ -1143,7 +1134,7 @@ class wmTabs {
     this.tabsOffset = this.activeTab.panel.offsetLeft;
 
     this.activeTab.panel.focus();
-    this.runHooks('afterOpenTab', tabId);
+    this.runHooks("afterOpenTab", tabId);
   }
   focusNextTab() {
     console.log("focus next");
@@ -1261,7 +1252,7 @@ class wmTabs {
   runHooks(hookName, ...args) {
     const hooks = this.settings.hooks[hookName] || [];
     hooks.forEach(callback => {
-      if (typeof callback === 'function') {
+      if (typeof callback === "function") {
         callback.apply(this, args);
       }
     });
@@ -1294,6 +1285,15 @@ class wmTabs {
   get instanceSettings() {
     const dataAttributes = {};
 
+    if (this.el.dataset.desktopNavigationType) {
+      this.el.dataset.breakpoints__767__navigationType =
+        this.el.dataset.desktopNavigationType;
+    }
+    if (this.el.dataset.mobileNavigationType) {
+      this.el.dataset.breakpoints__0__navigationType =
+        this.el.dataset.mobileNavigationType;
+    }
+
     // Function to set value in a nested object based on key path
     const setNestedProperty = (obj, keyPath, value) => {
       const keys = keyPath.split("__");
@@ -1311,7 +1311,6 @@ class wmTabs {
     for (let [attrName, value] of Object.entries(this.el.dataset)) {
       setNestedProperty(dataAttributes, attrName, value);
     }
-
     return dataAttributes;
   }
   get tabsOffset() {
@@ -1355,8 +1354,9 @@ class wmTabs {
 
 (() => {
   function initTabs() {
-    const els = document.querySelectorAll('[data-wm-plugin="tabs"]:not([data-loading-state])');
-    console.log(els)
+    const els = document.querySelectorAll(
+      '[data-wm-plugin="tabs"]:not([data-loading-state])'
+    );
     if (!els.length) return;
     els.forEach(el => {
       el.dataset.loadingState = "loading";
