@@ -455,19 +455,27 @@ class wmTabs {
   addStickyNavScrollEvent() {
     if (this.settings.stickyNav) {
       this.elements.pageHeader = document.querySelector("#header");
-      this.el.style.setProperty("--top-offset", this.settings.stickyNavOffset + "px" );
+      this.el.style.setProperty(
+        "--top-offset",
+        this.settings.stickyNavOffset + "px"
+      );
 
       const onScroll = () => {
         const rect = this.el.getBoundingClientRect();
 
         if (this.tweaks["tweak-fixed-header"] === "true") {
-          const headerBottom = this.elements.pageHeader.getBoundingClientRect().bottom;
+          const headerBottom =
+            this.elements.pageHeader.getBoundingClientRect().bottom;
           const offsetAmt = this.settings.stickyNavOffset + headerBottom;
-          rect.top <= offsetAmt ? this.el.classList.add("is-sticky") : this.el.classList.remove("is-sticky");
+          rect.top <= offsetAmt
+            ? this.el.classList.add("is-sticky")
+            : this.el.classList.remove("is-sticky");
 
-          this.el.style.setProperty("--nav-sticky-offset", headerBottom + "px" );
+          this.el.style.setProperty("--nav-sticky-offset", headerBottom + "px");
         } else {
-          rect.top <= this.settings.stickyNavOffset ? this.el.classList.add("is-sticky") : this.el.classList.remove("is-sticky");
+          rect.top <= this.settings.stickyNavOffset
+            ? this.el.classList.add("is-sticky")
+            : this.el.classList.remove("is-sticky");
           this.el.style.setProperty("--nav-sticky-offset", "0px");
         }
       };
@@ -1206,19 +1214,23 @@ class wmTabs {
     if (wmTabs.isEditModeEventListenerSet || !isBackend) return;
 
     let deconstructed = false;
+    const self = this;
 
-    function restoreSections() {
+    async function restoreSections() {
       if (wmTabs.originalPositions) {
         // Restore each section to its original position
         wmTabs.originalPositions.forEach((info, section) => {
           const {originalParent, placeholder} = info;
           if (originalParent && placeholder) {
+            section.removeAttribute("data-controllers-bound");
             placeholder.replaceWith(section); // Replace the placeholder with the section
           }
         });
 
-        // Clear the stored original positions after restoring
-        wm$.reloadSquarespaceLifecycle();
+        console.log("restored, now reloading 2");
+
+        await wm$.reloadSquarespaceLifecycle(self.el);
+
         wmTabs.originalPositions.clear();
       }
     }
@@ -1226,6 +1238,7 @@ class wmTabs {
     function deconstruct() {
       if (!deconstructed) {
         deconstructed = true;
+        console.log("deconstruct");
         restoreSections.call(this);
         bodyObserver.disconnect();
       }
@@ -1237,7 +1250,20 @@ class wmTabs {
         if (mutation.attributeName === "class") {
           const classList = document.body.classList;
           if (classList.contains("sqs-edit-mode-active")) {
-            deconstruct();
+            if (!deconstructed) {
+              deconstructed = true;
+              wmTabs.originalPositions.forEach((info, section) => {
+                section.remove();
+                // const {originalParent, placeholder} = info;
+                // if (originalParent && placeholder) {
+                //   section.removeAttribute("data-controllers-bound");
+                //   placeholder.replaceWith(section); // Replace the placeholder with the section
+                // }
+              });
+              wmTabs.originalPositions.clear();
+              wm$.reloadSquarespaceLifecycle(self.el);
+              bodyObserver.disconnect();
+            }
           }
         }
       });

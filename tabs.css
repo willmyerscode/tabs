@@ -162,6 +162,7 @@ body:not(.sqs-edit-mode-active)
   width: 100%;
   align-items: stretch;
   overflow-x: auto;
+  overflow-y: hidden;
   gap: var(--tabs-header-gap);
   padding-bottom: var(--nav-padding-bottom);
   border-radius: var(--nav-border-radius);
@@ -431,6 +432,10 @@ body:not(.sqs-edit-mode-active)
     var(--siteBackgroundColor) 50%
   );
 }
+/*Until I can fix sticky scrolling*/
+.wm-tabs[data-navigation-type="vertical"] > * > .tabs-header .scroll-indicator-container{
+  display:none;
+}
 .wm-tabs[data-navigation-type="vertical"] > * > .tabs-header .scroll-indicator.indicator-end {
   transform: translate(-50%, 0px);
   top: calc(100vh - 57px);
@@ -458,6 +463,9 @@ body:not(.sqs-edit-mode-active)
   visibility: hidden;
   transform: translate(0px, -50%);
 }
+.wm-tabs[data-navigation-indicators="start"][data-navigation-type="vertical"] > * > .tabs-header .scroll-indicator.indicator-end {
+  transform: translate(-50%, 0px);
+}
 .wm-tabs[data-navigation-indicators="start"] > * > .tabs-header .scroll-indicator.indicator-start {
   display: grid;
   opacity: 1;
@@ -474,6 +482,9 @@ body:not(.sqs-edit-mode-active)
   opacity: 0;
   visibility: hidden;
   transform: translate(0px, -50%);
+}
+.wm-tabs[data-navigation-indicators="end"][data-navigation-type="vertical"] > * > .tabs-header .scroll-indicator.indicator-start {
+  transform: translate(-50%, 0px);
 }
 .wm-tabs[data-navigation-indicators="both"] > * > .tabs-header .scroll-indicator.indicator-end {
   display: grid;
@@ -599,6 +610,15 @@ body:not(.sqs-edit-mode-active)
 }
 .select-navigation.open .select-items-container {
   display: block;
+}
+
+/*Click & Drag*/
+.wm-tabs[data-allow-click-and-drag="true"] .gallery-masonry .gallery-masonry-item[data-loaded] img,
+.wm-tabs[data-allow-click-and-drag="true"] .gallery-grid-item img,
+.wm-tabs[data-allow-click-and-drag="true"] .sqs-block-image img,
+.wm-tabs[data-allow-click-and-drag="true"] .sqs-block-summary-v2 .summary-thumbnail-container img {
+  user-select: none;
+  pointer-events: none;
 }
 
 /*Edit Mode*/
