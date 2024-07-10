@@ -58,6 +58,11 @@ class wmTabs {
     return window[wmTabs.pluginTitle + "Settings"] || {};
   }
   constructor(el) {
+    if (el.dataset.loadingState)  {
+      return;
+    } else {
+      el.dataset.loadingState = "loading"
+    }
     this.el = el;
     this.source = el.dataset.source;
     this.loadingState = "building";
@@ -356,7 +361,7 @@ class wmTabs {
       }
 
       let sections;
-      if (btn.dataset.target.includes("/")) {
+      if (btn.dataset.target?.includes("/")) {
         sections = "";
       } else {
         this.settings.isSectionsAdjusted = true;
@@ -1380,17 +1385,14 @@ class wmTabs {
 
 (() => {
   function initTabs() {
-    const els = document.querySelectorAll(
-      '[data-wm-plugin="tabs"]:not([data-loading-state])'
-    );
+    const els = document.querySelectorAll('[data-wm-plugin="tabs"]');
     if (!els.length) return;
-    els.forEach(el => {
-      el.dataset.loadingState = "loading";
-      el.wmTabs = new wmTabs(el);
-    });
+    els.forEach(el => el.wmTabs = new wmTabs(el));
   }
   window.wmTabs = {
     init: () => initTabs(),
   };
   window.wmTabs.init();
 })();
+
+
