@@ -47,7 +47,7 @@ class wmTabs {
       beforeInit: [],
       afterInit: [
         function () {
-          wm$.initializeAllPlugins();
+          wm$?.initializeAllPlugins();
         },
       ],
       beforeOpenTab: [],
@@ -127,13 +127,15 @@ class wmTabs {
     this.el.dataset.loadingState = "loaded";
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", () => {
-        wm$.reloadSquarespaceLifecycle(this.el);
-        wm$.emitEvent(`${wmTabs.pluginTitle}:ready`);
+        wm$?.reloadSquarespaceLifecycle(this.el);
+        wm$?.initializeCodeBlocks(this.el)
+        wm$?.emitEvent(`${wmTabs.pluginTitle}:ready`);
         this.loadingState = "complete";
       });
     } else {
-      wm$.reloadSquarespaceLifecycle(this.el);
-      wm$.emitEvent(`${wmTabs.pluginTitle}:ready`);
+      wm$?.reloadSquarespaceLifecycle(this.el);
+      wm$?.initializeCodeBlocks(this.el)
+      wm$?.emitEvent(`${wmTabs.pluginTitle}:ready`);
       this.loadingState = "complete";
     }
     window.setTimeout(() => {
@@ -1234,8 +1236,6 @@ class wmTabs {
           }
         });
 
-        console.log("restored, now reloading 2");
-
         await wm$.reloadSquarespaceLifecycle(self.el);
 
         wmTabs.originalPositions.clear();
@@ -1261,11 +1261,6 @@ class wmTabs {
               deconstructed = true;
               wmTabs.originalPositions.forEach((info, section) => {
                 section.remove();
-                // const {originalParent, placeholder} = info;
-                // if (originalParent && placeholder) {
-                //   section.removeAttribute("data-controllers-bound");
-                //   placeholder.replaceWith(section); // Replace the placeholder with the section
-                // }
               });
               wmTabs.originalPositions.clear();
               wm$.reloadSquarespaceLifecycle(self.el);
