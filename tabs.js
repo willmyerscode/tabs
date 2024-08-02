@@ -1,3 +1,8 @@
+/* =========
+  Squarespace Tabs Plugin
+  A Tabs Plugin for Squarespace
+  This Code is Licensed by Will-Myers.com
+========== */
 class wmTabs {
   static pluginTitle = "wmTabs";
   static isEditModeEventListenerSet = false;
@@ -129,12 +134,14 @@ class wmTabs {
       document.addEventListener("DOMContentLoaded", () => {
         wm$?.reloadSquarespaceLifecycle(this.el);
         wm$?.initializeCodeBlocks(this.el)
+        wm$?.initializeThirdPartyPlugins(this.el);
         wm$?.emitEvent(`${wmTabs.pluginTitle}:ready`);
         this.loadingState = "complete";
       });
     } else {
       wm$?.reloadSquarespaceLifecycle(this.el);
       wm$?.initializeCodeBlocks(this.el)
+      wm$?.initializeThirdPartyPlugins(this.el);
       wm$?.emitEvent(`${wmTabs.pluginTitle}:ready`);
       this.loadingState = "complete";
     }
