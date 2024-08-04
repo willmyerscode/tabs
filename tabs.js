@@ -3,6 +3,7 @@
   A Tabs Plugin for Squarespace
   This Code is Licensed by Will-Myers.com
 ========== */
+
 class wmTabs {
   static pluginTitle = "wmTabs";
   static isEditModeEventListenerSet = false;
@@ -63,10 +64,10 @@ class wmTabs {
     return window[wmTabs.pluginTitle + "Settings"] || {};
   }
   constructor(el) {
-    if (el.dataset.loadingState)  {
+    if (el.dataset.loadingState) {
       return;
     } else {
-      el.dataset.loadingState = "loading"
+      el.dataset.loadingState = "loading";
     }
     this.el = el;
     this.source = el.dataset.source;
@@ -130,21 +131,46 @@ class wmTabs {
 
     //Finalize Loading
     this.el.dataset.loadingState = "loaded";
+
     if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", () => {
-        wm$?.reloadSquarespaceLifecycle(this.el);
-        wm$?.initializeCodeBlocks(this.el)
-        wm$?.initializeThirdPartyPlugins(this.el);
-        wm$?.emitEvent(`${wmTabs.pluginTitle}:ready`);
-        this.loadingState = "complete";
+      document.addEventListener("DOMContentLoaded", async () => {
+        await handleDOMReady.call(this);
       });
     } else {
-      wm$?.reloadSquarespaceLifecycle(this.el);
-      wm$?.initializeCodeBlocks(this.el)
+      await handleDOMReady.call(this);
+    }
+
+    async function handleDOMReady() {
+      const sections = document.querySelector(
+        "#sections"
+      );
+      const lastSection = document.querySelector(
+        "#sections > section:last-child .content-wrapper"
+      );
+
+      let originalParent = this.el.parentNode;
+      let wasAppended = false;
+
+      if (!sections?.contains(this.el)) {
+        lastSection?.appendChild(this.el);
+        wasAppended = true;
+        await wm$?.reloadSquarespaceLifecycle(this.el);
+        window.dispatchEvent(new Event('resize'))
+      } else {
+        wm$?.reloadSquarespaceLifecycle(this.el);
+      }
+
+      wm$?.initializeCodeBlocks(this.el);
       wm$?.initializeThirdPartyPlugins(this.el);
+
+      if (wasAppended) {
+        originalParent.appendChild(this.el);
+      }
+
       wm$?.emitEvent(`${wmTabs.pluginTitle}:ready`);
       this.loadingState = "complete";
     }
+
     window.setTimeout(() => {
       this.setTabHeights();
       this.removeGlobalAnimations();
@@ -843,9 +869,12 @@ class wmTabs {
 
     // Touch and Mouse Down event handler
     function startSwipe(event) {
-      if (event.target.closest("img, button, a") && event.type.includes("mouse"))
+      if (
+        event.target.closest("img, button, a") &&
+        event.type.includes("mouse")
+      )
         return;
-      if (event.target.closest("a, button") && event.type.includes("touch")) 
+      if (event.target.closest("a, button") && event.type.includes("touch"))
         return;
       isDragging = true;
       startX = getPositionX(event);
@@ -1391,7 +1420,7 @@ class wmTabs {
   function initTabs() {
     const els = document.querySelectorAll('[data-wm-plugin="tabs"]');
     if (!els.length) return;
-    els.forEach(el => el.wmTabs = new wmTabs(el));
+    els.forEach(el => (el.wmTabs = new wmTabs(el)));
   }
   window.wmTabs = {
     init: () => initTabs(),
