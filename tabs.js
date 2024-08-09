@@ -141,9 +141,7 @@ class wmTabs {
     }
 
     async function handleDOMReady() {
-      const sections = document.querySelector(
-        "#sections"
-      );
+      const sections = document.querySelector("#sections");
       const lastSection = document.querySelector(
         "#sections > section:last-child .content-wrapper"
       );
@@ -155,7 +153,7 @@ class wmTabs {
         lastSection?.appendChild(this.el);
         wasAppended = true;
         await wm$?.reloadSquarespaceLifecycle(this.el);
-        window.dispatchEvent(new Event('resize'))
+        window.dispatchEvent(new Event("resize"));
       } else {
         wm$?.reloadSquarespaceLifecycle(this.el);
       }
@@ -1259,52 +1257,30 @@ class wmTabs {
     if (wmTabs.isEditModeEventListenerSet || !isBackend) return;
 
     let deconstructed = false;
-    const self = this;
-
-    async function restoreSections() {
-      if (wmTabs.originalPositions) {
-        // Restore each section to its original position
-        wmTabs.originalPositions.forEach((info, section) => {
-          const {originalParent, placeholder} = info;
-          if (originalParent && placeholder) {
-            section.removeAttribute("data-controllers-bound");
-            placeholder.replaceWith(section); // Replace the placeholder with the section
-          }
-        });
-
-        await wm$.reloadSquarespaceLifecycle(self.el);
-
-        wmTabs.originalPositions.clear();
-      }
-    }
-
-    function deconstruct() {
-      if (!deconstructed) {
-        deconstructed = true;
-        console.log("deconstruct");
-        restoreSections.call(this);
-        bodyObserver.disconnect();
-      }
-    }
 
     // Observe changes to the body's class attribute
-    const bodyObserver = new MutationObserver(mutations => {
-      mutations.forEach(mutation => {
+    const bodyObserver = new MutationObserver(async mutations => {
+      for (const mutation of mutations) {
         if (mutation.attributeName === "class") {
           const classList = document.body.classList;
           if (classList.contains("sqs-edit-mode-active")) {
-            if (!deconstructed) {
+            console.log("editing!");
+            if (!deconstructed && wmTabs.originalPositions) {
               deconstructed = true;
               wmTabs.originalPositions.forEach((info, section) => {
                 section.remove();
               });
               wmTabs.originalPositions.clear();
-              wm$.reloadSquarespaceLifecycle(self.el);
+              try {
+                await wm$.reloadSquarespaceLifecycle();
+              } catch (error) {
+                console.error("Error reloading Squarespace lifecycle:", error);
+              }
               bodyObserver.disconnect();
             }
           }
         }
-      });
+      }
     });
 
     bodyObserver.observe(document.body, {
@@ -1427,3 +1403,4 @@ class wmTabs {
   };
   window.wmTabs.init();
 })();
+
