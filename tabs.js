@@ -185,6 +185,10 @@ class wmTabs {
     this.addNextAndPrevTabButtonEvents();
     this.addClickAndDragSwipeEvent();
     this.hasAccordionInBreakpoints ? this.addAccordionButtonClickEvent() : null;
+    this.el.addEventListener('click', (e) => {
+      if (!e.target.closest('.tab-panel')) return;
+      this.setTabHeights()
+    })
   }
   buildStructure() {
     this.elements = {};
@@ -1264,7 +1268,6 @@ class wmTabs {
         if (mutation.attributeName === "class") {
           const classList = document.body.classList;
           if (classList.contains("sqs-edit-mode-active")) {
-            console.log("editing!");
             if (!deconstructed && wmTabs.originalPositions) {
               deconstructed = true;
               wmTabs.originalPositions.forEach((info, section) => {
@@ -1403,4 +1406,3 @@ class wmTabs {
   };
   window.wmTabs.init();
 })();
-
