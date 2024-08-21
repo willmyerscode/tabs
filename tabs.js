@@ -556,17 +556,26 @@ class wmTabs {
     }
   }
   getHashValueFromText(text) {
-    const filteredText = text.replace(/[^a-zA-Z0-9_-]/g, "-");
+    // Function to normalize accented characters
+    const normalizeText = (str) => {
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    };
+  
+    // Normalize the text first
+    const normalizedText = normalizeText(text);
+    
+    // Then apply the filtering
+    const filteredText = normalizedText.replace(/[^a-zA-Z0-9_-]/g, "-");
     let encodedText = encodeURIComponent(filteredText.trim().toLowerCase());
     let num = 0;
     let newText = encodedText;
-
+  
     // Check if there is a button with the same data-id, append a number if found
     while (document.querySelector(`button[data-id="${newText}"]`)) {
       num++;
       newText = `${encodedText}-${num}`;
     }
-
+  
     return newText;
   }
   getInitialTabIndex() {
