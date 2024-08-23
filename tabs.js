@@ -507,7 +507,7 @@ class wmTabs {
 
         if (this.tweaks["tweak-fixed-header"] === "true") {
           const headerBottom =
-            this.elements.pageHeader.getBoundingClientRect().bottom;
+            this.elements.pageHeader?.getBoundingClientRect().bottom || 0;
           const offsetAmt = this.settings.stickyNavOffset + headerBottom;
           rect.top <= offsetAmt
             ? this.el.classList.add("is-sticky")
