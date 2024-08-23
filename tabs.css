@@ -676,6 +676,12 @@ body.sqs-edit-mode-active
   clip-path: initial;
 }
 
+/*Shape Block Overrides*/
+.tab-content [data-stretched-to-fill] > .sqs-shape {
+  width: 100%;
+  height: 100%;
+}
+
 .wm-tabs {
   /*Tabs Navigation*/
   /* --tabs-header-border-bottom-color: hsla(var(--wm-text-hsl), 50%);
