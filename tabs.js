@@ -158,8 +158,19 @@ class wmTabs {
         wm$?.reloadSquarespaceLifecycle(this.el);
       }
 
-      wm$?.initializeCodeBlocks(this.el);
-      wm$?.initializeThirdPartyPlugins(this.el);
+      try {
+        if (typeof wm$.initializeCodeBlocks === 'function') {
+          await wm$.initializeCodeBlocks(this.el);
+        }
+        if (typeof wm$.initializeEmbedBlocks === 'function') {
+          await wm$.initializeEmbedBlocks(this.el);
+        }
+        if (typeof wm$.initializeThirdPartyPlugins === 'function') {
+          await wm$.initializeThirdPartyPlugins(this.el);
+        }
+      } catch (error) {
+        console.error('Error during initialization:', error);
+      }
 
       if (wasAppended) {
         originalParent.appendChild(this.el);
@@ -620,15 +631,12 @@ class wmTabs {
 
       tab.button.addEventListener("keydown", event => {
         if (event.key === "Enter" || event.key === " ") {
-          console.log("enter");
           event.preventDefault();
           handleClickEvent(tab);
         } else if (event.key === "ArrowRight") {
-          console.log("right");
           event.preventDefault();
           this.focusNextTab();
         } else if (event.key === "ArrowLeft") {
-          console.log("left");
           event.preventDefault();
           this.focusPreviousTab();
         } else if (event.key === "Tab") {
@@ -826,7 +834,6 @@ class wmTabs {
           tab.button.classList.add("active");
           tab.panel.classList.add("active");
           tab.panel.style.transform = "translateX(0px)";
-          console.log(tab.content.scrollHeight);
           tab.content.style.height = tab.content.scrollHeight + "px";
           tab.content.style.maxHeight = "";
         } else {
@@ -1201,7 +1208,6 @@ class wmTabs {
     this.runHooks("afterOpenTab", tabId);
   }
   focusNextTab() {
-    console.log("focus next");
     const focusedIndex = this.getFocusedTabIndex();
     if (focusedIndex !== -1) {
       const nextIndex = (focusedIndex + 1) % this.tabs.length;
