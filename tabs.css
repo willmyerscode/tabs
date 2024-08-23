@@ -354,6 +354,9 @@ body:not(.sqs-edit-mode-active)
   height: var(--active-indicator-height);
   background: var(--active-indicator-color);
   border-radius: var(--active-indicator-border-radius);
+  border-width: var(--active-indicator-border-width);
+  border-color: var(--active-indicator-border-color);
+  border-style: solid;
   box-sizing: border-box;
 }
 [data-loading-state="loaded"].wm-tabs .tabs-header .active-indicator {
@@ -717,6 +720,8 @@ body.sqs-edit-mode-active
   --active-indicator-width: var(--tab-button-active-width);
   --active-indicator-color: hsla(var(--wm-accent-hsl), 1);
   --active-indicator-border-radius: var(--tab-button-border-radius);
+  --active-indicator-border-color: currentColor;
+  --active-indicator-border-width: 0px;
 
   --tab-button-image-aspect-ratio: 1;
   --tab-button-image-width: 150px;
