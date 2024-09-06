@@ -71,6 +71,10 @@ class wmTabs {
     }
     this.el = el;
     this.source = el.dataset.source;
+    if (this.el.parentElement.closest(`[data-wm-plugin="tabs"][data-source="${this.source}"]`)){
+      console.error("Recursive tabs plugin detected");
+      return;
+    }
     this.loadingState = "building";
     this.installationMethod;
     if (this.source) {
