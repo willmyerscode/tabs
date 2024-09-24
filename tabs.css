@@ -744,7 +744,8 @@ body.sqs-edit-mode-active
 
 /*Force Images*/
 .sqs-block-calendar img,
-.sqs-block-gallery img {
+.sqs-block-gallery img,
+.sqs-block-summary-v2 .summary-block-wrapper:not(.sqs-gallery-design-autocolumns) img {
   left: 0 !important;
   top: 0 !important;
   position: relative !important;
