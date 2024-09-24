@@ -54,6 +54,7 @@ class wmTabs {
       afterInit: [
         function () {
           wm$?.initializeAllPlugins();
+          
         },
       ],
       beforeOpenTab: [],
