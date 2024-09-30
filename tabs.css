@@ -754,6 +754,9 @@ body.sqs-edit-mode-active
   position: absolute !important;
   object-position: var(--wm-focal-point, center) !important;
 }
+.tab-content .sqs-block-gallery .content-fit img[data-parent-ratio]{
+  object-fit: contain !important;
+}
 
 /*Layout Engine Inside Fluid Engine*/
 .tab-content .sqs-layout .row > .sqs-block,
