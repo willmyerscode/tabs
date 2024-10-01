@@ -295,6 +295,8 @@ body:not(.sqs-edit-mode-active)
   margin: 0px;
   font-size: var(--tab-button-font-size);
   font-weight: var(--tab-button-font-weight);
+  text-transform: var(--tab-button-text-transform);
+  font-family: var(--tab-button-font-family, var(--heading-font-font-family, inherit));
   color: inherit;
 }
 .wm-tabs nav button:hover .tab-title {
@@ -643,6 +645,7 @@ body:not(.sqs-edit-mode-active)
   border-width: var(--select-navigation-button-border-width);
   border-color: var(--select-navigation-button-border-color);
   border-radius: var(--select-navigation-button-border-radius);
+  font-family: var(--select-button-font-family, inherit);
   font-size: var(--select-button-font-size);
   padding: var(--select-button-padding-y) var(--select-button-padding-x);
 }
@@ -878,8 +881,6 @@ body.sqs-edit-mode-active
   --tab-content-border-color: currentColor;
   --tab-content-border-width: 0px;
   --tab-content-border-style: solid;
-}
-@media (max-width: 767px) {
 }
 
 :root .wm-tabs {
