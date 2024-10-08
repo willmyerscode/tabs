@@ -173,6 +173,9 @@ class wmTabs {
         if (typeof wm$.initializeThirdPartyPlugins === 'function') {
           await wm$.initializeThirdPartyPlugins(this.el);
         }
+        if (typeof wm$.handleAddingMissingColorTheme === 'function') {
+          await wm$.handleAddingMissingColorTheme(); 
+        }
       } catch (error) {
         console.error('Error during initialization:', error);
       }
