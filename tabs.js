@@ -188,6 +188,8 @@ class wmTabs {
       this.loadingState = "complete";
     }
 
+    this.setNavWidth();
+    this.setActiveIndicator();
     window.setTimeout(() => {
       this.setTabHeights();
       this.removeGlobalAnimations();
