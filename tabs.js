@@ -60,6 +60,7 @@ class wmTabs {
       beforeOpenTab: [],
       afterOpenTab: [],
     },
+    disableAutoScroll: false,
   };
   static get userSettings() {
     return window[wmTabs.pluginTitle + "Settings"] || {};
@@ -781,6 +782,9 @@ class wmTabs {
     }
   }
   scrollTabIntoView() {
+    // Add a new setting to control auto-scrolling
+    if (this.settings.disableAutoScroll) return;
+
     const tolerance = this.settings.scrollTabActivateTolerance;
     const nav = this.elements.nav;
     const activeTabButton = this.activeTab.button;
