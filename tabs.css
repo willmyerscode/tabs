@@ -3,6 +3,7 @@
   display: block;
   overflow: hidden;
   position: relative;
+  z-index: 1;
   border-top-style: var(
     --tab-content-border-top-style,
     var(--tab-content-border-style)
@@ -82,6 +83,7 @@ body:not(.sqs-edit-mode-active)
   display: none;
   position: relative;
   transition: background-color 0.2s ease;
+  z-index: 2;
 }
 
 /* Tabs Content */
@@ -605,6 +607,7 @@ body:not(.sqs-edit-mode-active)
   max-width: var(--nav-max-width);
   width: 100%;
   box-sizing: border-box;
+  z-index: 3;
 }
 .wm-tabs[data-navigation-type="select"] > * > .select-navigation-container {
   display: block;
