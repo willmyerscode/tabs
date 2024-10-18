@@ -761,6 +761,13 @@ body.sqs-edit-mode-active
   object-position: var(--wm-focal-point, center) !important;
 }
 .tab-content .sqs-block-gallery .content-fit img[data-parent-ratio]{
+  object-position: unset !important;
+}
+
+.tab-content .sqs-block-gallery .image-slide-anchor{
+  position: relative;
+}
+.tab-content .sqs-block-gallery .content-fit img[data-parent-ratio]{
   object-fit: contain !important;
 }
 
