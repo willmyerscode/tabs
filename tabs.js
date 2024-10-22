@@ -102,6 +102,7 @@ class wmTabs {
       breakpoint => breakpoint.navigationType === "select"
     );
     this.init();
+
   }
   async init() {
     this.runHooks("beforeInit");
@@ -206,6 +207,7 @@ class wmTabs {
     this.addStickyNavScrollEvent();
     this.addNextAndPrevTabButtonEvents();
     this.addClickAndDragSwipeEvent();
+    this.addGlobalLinkClickListener();
     this.hasAccordionInBreakpoints ? this.addAccordionButtonClickEvent() : null;
     this.el.addEventListener('click', (e) => {
       if (!e.target.closest('.tab-panel')) return;
@@ -1421,6 +1423,32 @@ class wmTabs {
       "--nav-scroll-height",
       this._navHeight + "px"
     );
+  }
+  addGlobalLinkClickListener() {
+    document.addEventListener('click', (event) => {
+      const clickedElement = event.target.closest('a');
+      if (!clickedElement) return;
+
+      const href = clickedElement.getAttribute('href');
+      if (!href || !href.startsWith('#')) return;
+
+      const tabId = href.substring(1);
+      const matchingTab = this.tabs.find(tab => tab.id === tabId);
+
+      if (matchingTab) {
+        event.preventDefault();
+        this.scrollToTabsAndOpen(tabId);
+      }
+    });
+  }
+  scrollToTabsAndOpen(tabId) {
+    // Scroll to the tabs component
+    this.el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Wait for the scroll to complete before opening the tab
+    setTimeout(() => {
+      this.openTab(tabId);
+    }, 500); // Adjust this delay if needed
   }
 }
 
