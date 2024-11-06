@@ -127,6 +127,21 @@ class wmTabs {
       if (this.settings.isSectionsAdjusted) this.addEditModeObserver();
     }
 
+    // Edge To Edge
+    if (this.settings.edgeToEdge) {
+      this.el.classList.add("edge-to-edge");
+      this.tabs.forEach(tab => {
+        const sections = tab.panel.querySelectorAll(
+          "section.page-section[data-fluid-engine-section]"
+        );
+        sections.forEach(section => {
+          const fluidEngine = section.querySelector(".fluid-engine");
+          const columnGap = getComputedStyle(fluidEngine).columnGap;
+          fluidEngine.style.setProperty("--wm-column-gap", columnGap);
+        });
+      });
+    }
+
     this.setStyles();
     this.setIsNavMaxWidth();
     this.bindEvents();
@@ -395,22 +410,6 @@ class wmTabs {
     this.elements.tabsContentWrapper.appendChild(contentFragment);
     this.elements.nav.appendChild(tabButtonsFragment);
     this.el.style.setProperty("--tabs-count", this.tabs.length);
-
-    // Edge To Edge
-    if (this.settings.edgeToEdge) {
-      this.el.classList.add("edge-to-edge");
-      this.tabs.forEach(tab => {
-        const sections = tab.panel.querySelectorAll(
-          "section.page-section[data-fluid-engine-section]"
-        );
-        sections.forEach(section => {
-          const fluidEngine = section.querySelector(".fluid-engine");
-          const columnGap = getComputedStyle(fluidEngine).columnGap;
-          fluidEngine.style.setProperty("--wm-column-gap", columnGap);
-        });
-      });
-    }
-
   }
   moveFromTargets() {
     const contentFragment = document.createDocumentFragment();
@@ -592,7 +591,7 @@ class wmTabs {
         window.scrollY + elRect.top - this.settings.scrollBackOffset;
       const behavior =
         this.settings.scrollBackBehavior === "smooth" ? "smooth" : "auto";
-        
+
       window.scrollTo({
         top: targetScrollY,
         behavior: behavior,
@@ -1463,7 +1462,7 @@ class wmTabs {
   }
   scrollToTabsAndOpen(tabId) {
     // Scroll to the tabs component
-    this.el.scrollIntoView({ behavior: "smooth", block: "start" });
+    this.el.scrollIntoView({behavior: "smooth", block: "start"});
 
     // Wait for the scroll to complete before opening the tab
     setTimeout(() => {
