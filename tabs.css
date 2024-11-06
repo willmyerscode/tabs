@@ -802,10 +802,21 @@ body.sqs-edit-mode-active
   height: 100%;
 }
 
+/*Edge To Edge*/
+.wm-tabs.edge-to-edge .tab-content > section .fluid-engine {
+  grid-template-columns: 0 repeat(8, minmax(0, var(--cell-max-width))) 0;
+  margin-left: calc(-1 * var(--wm-column-gap));
+  margin-right: calc(-1 * var(--wm-column-gap));
+}
+@media(min-width: 767px) {
+  .wm-tabs.edge-to-edge .tab-content > section .fluid-engine {
+    grid-template-columns: 0px repeat(24, minmax(0, var(--cell-max-width))) 0px;
+  }
+}
+
+/*Default Settings*/
 .wm-tabs {
   /*Tabs Navigation*/
-  /* --tabs-header-border-bottom-color: hsla(var(--wm-text-hsl), 50%);
-  --tabs-header-border-bottom-width: 2px; */
   --tabs-nav-border-color: hsla(var(--wm-text-hsl), 50%);
   --tabs-nav-border-width: 2px;
 
