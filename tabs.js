@@ -24,6 +24,7 @@ class wmTabs {
     dragStartThreshold: 10,
     slideTransitionDuration: 300,
     allowClickAndDrag: false,
+    edgeToEdge: false,
     allowTouchSwipe: false,
     accordionIcon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75 12 3m0 0 3.75 3.75M12 3v18" />
@@ -54,7 +55,6 @@ class wmTabs {
       afterInit: [
         function () {
           wm$?.initializeAllPlugins();
-          
         },
       ],
       beforeOpenTab: [],
@@ -73,7 +73,11 @@ class wmTabs {
     }
     this.el = el;
     this.source = el.dataset.source;
-    if (this.el.parentElement.closest(`[data-wm-plugin="tabs"][data-source="${this.source}"]`)){
+    if (
+      this.el.parentElement.closest(
+        `[data-wm-plugin="tabs"][data-source="${this.source}"]`
+      )
+    ) {
       console.error("Recursive tabs plugin detected");
       return;
     }
@@ -102,7 +106,6 @@ class wmTabs {
       breakpoint => breakpoint.navigationType === "select"
     );
     this.init();
-
   }
   async init() {
     this.runHooks("beforeInit");
@@ -166,20 +169,20 @@ class wmTabs {
       }
 
       try {
-        if (typeof wm$.initializeCodeBlocks === 'function') {
+        if (typeof wm$.initializeCodeBlocks === "function") {
           await wm$.initializeCodeBlocks(this.el);
         }
-        if (typeof wm$.initializeEmbedBlocks === 'function') {
+        if (typeof wm$.initializeEmbedBlocks === "function") {
           await wm$.initializeEmbedBlocks(this.el);
         }
-        if (typeof wm$.initializeThirdPartyPlugins === 'function') {
+        if (typeof wm$.initializeThirdPartyPlugins === "function") {
           await wm$.initializeThirdPartyPlugins(this.el);
         }
-        if (typeof wm$.handleAddingMissingColorTheme === 'function') {
-          await wm$.handleAddingMissingColorTheme(); 
+        if (typeof wm$.handleAddingMissingColorTheme === "function") {
+          await wm$.handleAddingMissingColorTheme();
         }
       } catch (error) {
-        console.error('Error during initialization:', error);
+        console.error("Error during initialization:", error);
       }
 
       if (wasAppended) {
@@ -209,10 +212,10 @@ class wmTabs {
     this.addClickAndDragSwipeEvent();
     this.addGlobalLinkClickListener();
     this.hasAccordionInBreakpoints ? this.addAccordionButtonClickEvent() : null;
-    this.el.addEventListener('click', (e) => {
-      if (!e.target.closest('.tab-panel')) return;
-      this.setTabHeights()
-    })
+    this.el.addEventListener("click", e => {
+      if (!e.target.closest(".tab-panel")) return;
+      this.setTabHeights();
+    });
   }
   buildStructure() {
     this.elements = {};
@@ -388,9 +391,26 @@ class wmTabs {
         tab.selectItem = selectItem;
       }
     });
+
     this.elements.tabsContentWrapper.appendChild(contentFragment);
     this.elements.nav.appendChild(tabButtonsFragment);
     this.el.style.setProperty("--tabs-count", this.tabs.length);
+
+    // Edge To Edge
+    if (this.settings.edgeToEdge) {
+      this.el.classList.add("edge-to-edge");
+      this.tabs.forEach(tab => {
+        const sections = tab.panel.querySelectorAll(
+          "section.page-section[data-fluid-engine-section]"
+        );
+        sections.forEach(section => {
+          const fluidEngine = section.querySelector(".fluid-engine");
+          const columnGap = getComputedStyle(fluidEngine).columnGap;
+          fluidEngine.style.setProperty("--wm-column-gap", columnGap);
+        });
+      });
+    }
+
   }
   moveFromTargets() {
     const contentFragment = document.createDocumentFragment();
@@ -567,12 +587,12 @@ class wmTabs {
   scrollBackToTop() {
     const elRect = this.el.getBoundingClientRect();
 
-    if (elRect.top <= 0) {
+    if (elRect.top <= -1) {
       const targetScrollY =
         window.scrollY + elRect.top - this.settings.scrollBackOffset;
       const behavior =
         this.settings.scrollBackBehavior === "smooth" ? "smooth" : "auto";
-
+        
       window.scrollTo({
         top: targetScrollY,
         behavior: behavior,
@@ -581,25 +601,25 @@ class wmTabs {
   }
   getHashValueFromText(text) {
     // Function to normalize accented characters
-    const normalizeText = (str) => {
+    const normalizeText = str => {
       return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     };
-  
+
     // Normalize the text first
     const normalizedText = normalizeText(text);
-    
+
     // Then apply the filtering
     const filteredText = normalizedText.replace(/[^a-zA-Z0-9_-]/g, "-");
     let encodedText = encodeURIComponent(filteredText.trim().toLowerCase());
     let num = 0;
     let newText = encodedText;
-  
+
     // Check if there is a button with the same data-id, append a number if found
     while (document.querySelector(`button[data-id="${newText}"]`)) {
       num++;
       newText = `${encodedText}-${num}`;
     }
-  
+
     return newText;
   }
   getInitialTabIndex() {
@@ -1425,12 +1445,12 @@ class wmTabs {
     );
   }
   addGlobalLinkClickListener() {
-    document.addEventListener('click', (event) => {
-      const clickedElement = event.target.closest('a');
+    document.addEventListener("click", event => {
+      const clickedElement = event.target.closest("a");
       if (!clickedElement) return;
 
-      const href = clickedElement.getAttribute('href');
-      if (!href || !href.startsWith('#')) return;
+      const href = clickedElement.getAttribute("href");
+      if (!href || !href.startsWith("#")) return;
 
       const tabId = href.substring(1);
       const matchingTab = this.tabs.find(tab => tab.id === tabId);
@@ -1443,7 +1463,7 @@ class wmTabs {
   }
   scrollToTabsAndOpen(tabId) {
     // Scroll to the tabs component
-    this.el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    this.el.scrollIntoView({ behavior: "smooth", block: "start" });
 
     // Wait for the scroll to complete before opening the tab
     setTimeout(() => {
