@@ -17,6 +17,7 @@ class wmTabs {
     stickyNav: false,
     stickyNavThrottle: 100,
     stickyNavOffset: 17,
+    scrollBackToTop: true,
     scrollBackOffset: 150,
     scrollBackBehavior: "auto",
     overflowIndicatorAction: "scroll",
@@ -584,6 +585,7 @@ class wmTabs {
     }
   }
   scrollBackToTop() {
+    if (!this.settings.scrollBackToTop) return;
     const elRect = this.el.getBoundingClientRect();
 
     if (elRect.top <= -1) {
