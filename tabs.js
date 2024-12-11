@@ -1451,14 +1451,21 @@ class wmTabs {
       if (!clickedElement) return;
 
       const href = clickedElement.getAttribute("href");
-      if (!href || !href.startsWith("#")) return;
+      if (!href) return;
 
-      const tabId = href.substring(1);
-      const matchingTab = this.tabs.find(tab => tab.id === tabId);
+      // Create URL objects for comparison
+      const linkUrl = new URL(href, window.location.href);
+      const currentUrl = new URL(window.location.href);
 
-      if (matchingTab) {
-        event.preventDefault();
-        this.scrollToTabsAndOpen(tabId);
+      // Check if pathnames match and there's a hash
+      if (linkUrl.pathname === currentUrl.pathname && linkUrl.hash) {
+        const tabId = linkUrl.hash.substring(1);
+        const matchingTab = this.tabs.find(tab => tab.id === tabId);
+
+        if (matchingTab) {
+          event.preventDefault();
+          this.scrollToTabsAndOpen(tabId);
+        }
       }
     });
   }
