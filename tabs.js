@@ -1133,6 +1133,8 @@ class wmTabs {
   setNavWidth() {
     this.elements.nav.style.setProperty("--nav-scroll-width", "0px");
     this.elements.nav.style.setProperty("--nav-scroll-height", "0px");
+    this.elements.nav.style.setProperty("--nav-full-width", "0px");
+    this.elements.nav.style.setProperty("--nav-full-height", "0px");
 
     requestAnimationFrame(() => {
       this.navWidth = this.elements.nav.offsetWidth - 1;
