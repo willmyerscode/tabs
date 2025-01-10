@@ -694,6 +694,7 @@ class wmTabs {
     const height = btn.offsetHeight - 1;
     const left = btn.offsetLeft;
     const top = btn.offsetTop + 0.5;
+
     const navPaddingInline = window.getComputedStyle(
       this.elements.nav
     ).paddingInlineStart;
@@ -1134,8 +1135,10 @@ class wmTabs {
     this.elements.nav.style.setProperty("--nav-scroll-height", "0px");
 
     requestAnimationFrame(() => {
-      this.navWidth = this.elements.nav.scrollWidth - 1;
-      this.navHeight = this.elements.nav.scrollHeight - 1;
+      this.navWidth = this.elements.nav.offsetWidth - 1;
+      this.navHeight = this.elements.nav.offsetHeight - 1;
+      this.navFullWidth = this.elements.nav.scrollWidth - 1;
+      this.navFullHeight = this.elements.nav.scrollHeight - 1;
     });
   }
   setIsNavMaxWidth() {
@@ -1435,6 +1438,26 @@ class wmTabs {
       this._navWidth + "px"
     );
   }
+  get navFullWidth() {
+    return this._navFullWidth;
+  }
+  set navFullWidth(width) {
+    this._navFullWidth = width;
+    this.elements.nav.style.setProperty(
+      "--nav-full-width",
+      this._navFullWidth + "px"
+    );
+  }
+  get navFullHeight() {
+    return this._navFullHeight;
+  }
+  set navFullHeight(height) {
+    this._navFullHeight = height;
+    this.elements.nav.style.setProperty(
+      "--nav-full-height",
+      this._navFullHeight + "px"
+    );
+  }
   get navHeight() {
     return this._navHeight;
   }
@@ -1451,7 +1474,7 @@ class wmTabs {
       if (!clickedElement) return;
 
       const href = clickedElement.getAttribute("href");
-      if (!href) return;
+      if (!href || !href.startsWith("#")) return;
 
       // Create URL objects for comparison
       const linkUrl = new URL(href, window.location.href);
