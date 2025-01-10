@@ -363,11 +363,11 @@ body:not(.sqs-edit-mode-active)
   > .tabs-header
   .indicator-track {
   height: var(--tab-indicator-track-size);
-  width: var(--nav-scroll-width);
+  width: var(--nav-full-width);
   bottom: 0px;
 }
 .wm-tabs[data-navigation-type="vertical"] > * > .tabs-header .indicator-track {
-  height: var(--nav-scroll-height);
+  height: var(--nav-full-height);
   width: var(--tab-indicator-track-size);
   right: 0px;
 }
