@@ -1476,7 +1476,7 @@ class wmTabs {
       if (!clickedElement) return;
 
       const href = clickedElement.getAttribute("href");
-      if (!href || !href.startsWith("#")) return;
+      if (!href) return;
 
       // Create URL objects for comparison
       const linkUrl = new URL(href, window.location.href);
