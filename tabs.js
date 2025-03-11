@@ -24,6 +24,7 @@ class wmTabs {
     swipeThreshold: 50,
     dragStartThreshold: 10,
     slideTransitionDuration: 300,
+    weglotPaths: [],
     allowClickAndDrag: false,
     edgeToEdge: false,
     allowTouchSwipe: false,
@@ -113,7 +114,9 @@ class wmTabs {
     this.el.dataset.navigationType = this.getNavigationType();
     this.buildStructure();
     if (this.source) {
-      const {items, type} = await wm$.collectionData(this.source);
+      const {items, type} = await wm$.collectionData(this.source, {
+        weglotPaths: this.settings.weglotPaths,
+      });
       this.items = items;
       this.type = type;
       const tabLimit =
@@ -178,10 +181,10 @@ class wmTabs {
       if (!sections?.contains(this.el)) {
         lastSection?.appendChild(this.el);
         wasAppended = true;
-        await wm$?.reloadSquarespaceLifecycle(this.el);
+        await wm$?.reloadSquarespaceLifecycle([this.el]);
         window.dispatchEvent(new Event("resize"));
       } else {
-        wm$?.reloadSquarespaceLifecycle(this.el);
+        await wm$?.reloadSquarespaceLifecycle([this.el]);
       }
 
       try {
@@ -1193,7 +1196,9 @@ class wmTabs {
   pauseAllVideos() {
     const videos = this.el.querySelectorAll(".sqs-block-video");
     videos.forEach(vid => {
-      vid.$wmPause ? vid.$wmPause() : null;
+      if (vid.$wmPause && vid.querySelector("video")?.volume > 0 && !vid.querySelector("video")?.muted) {
+        vid.$wmPause();
+      }
     });
   }
   nextTab() {
