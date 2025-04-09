@@ -241,7 +241,7 @@ body:not(.sqs-edit-mode-active)
   border-radius: var(--nav-border-radius);
   background-color: var(--nav-background-color);
   box-sizing: border-box;
-  max-height: calc(100vh - 17px);
+  max-height: calc(100vh - var(--nav-sticky-offset, 0px));
 }
 .wm-tabs[data-navigation-type="vertical"][data-sticky-nav="true"].is-sticky
   > *
