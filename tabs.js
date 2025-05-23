@@ -1216,6 +1216,12 @@ class wmTabs {
     this.openTab(this.tabs[prevIndex].id);
   }
   openTab(tabId) {
+    // Safety check to ensure the instance is fully initialized
+    if (!this.settings || !this.tabs || this.tabs.length === 0) {
+      console.warn("wmTabs instance not fully initialized. Cannot open tab:", tabId);
+      return;
+    }
+
     this.runHooks("beforeOpenTab", tabId);
 
     const activeTab = this.tabs.filter(tab => tab.id === tabId)[0];
@@ -1319,6 +1325,7 @@ class wmTabs {
     });
   }
   addEditModeObserver() {
+
     const isBackend = window.self !== window.top;
     if (wmTabs.isEditModeEventListenerSet || !isBackend) return;
 
@@ -1355,6 +1362,10 @@ class wmTabs {
     wmTabs.isEditModeEventListenerSet = true;
   }
   runHooks(hookName, ...args) {
+    // Safety check to handle cases where settings might be undefined
+    if (!this.settings || !this.settings.hooks) {
+      return;
+    }
     const hooks = this.settings.hooks[hookName] || [];
     hooks.forEach(callback => {
       if (typeof callback === "function") {
@@ -1514,7 +1525,13 @@ class wmTabs {
   function initTabs() {
     const els = document.querySelectorAll('[data-wm-plugin="tabs"]');
     if (!els.length) return;
-    els.forEach(el => (el.wmTabs = new wmTabs(el)));
+    els.forEach(el => {
+      const instance = new wmTabs(el);
+      // Only assign the instance if it was properly initialized
+      if (instance.settings && instance.tabs !== undefined) {
+        el.wmTabs = instance;
+      }
+    });
   }
   window.wmTabs = {
     init: () => initTabs(),
