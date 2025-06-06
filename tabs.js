@@ -1,3 +1,4 @@
+
 /* =========
   Squarespace Tabs Plugin
   A Tabs Plugin for Squarespace
@@ -179,6 +180,7 @@ class wmTabs {
       let wasAppended = false;
 
       if (!sections?.contains(this.el)) {
+        this.el.classList.add("moving-tabs-for-initialization");
         lastSection?.appendChild(this.el);
         wasAppended = true;
         await wm$?.reloadSquarespaceLifecycle([this.el]);
@@ -204,17 +206,20 @@ class wmTabs {
         console.error("Error during initialization:", error);
       }
 
-      if (wasAppended) {
+      if (wasAppended) {  
         originalParent.appendChild(this.el);
+        this.el.classList.remove("moving-tabs-for-initialization");
       }
+
 
       wm$?.emitEvent(`${wmTabs.pluginTitle}:ready`);
       this.loadingState = "complete";
     }
 
     this.setNavWidth();
-    this.setActiveIndicator();
     window.setTimeout(() => {
+      this.openTab(this.activeTab.id);
+      this.setActiveIndicator();
       this.setTabHeights();
       this.removeGlobalAnimations();
     }, 650);
@@ -1196,7 +1201,11 @@ class wmTabs {
   pauseAllVideos() {
     const videos = this.el.querySelectorAll(".sqs-block-video");
     videos.forEach(vid => {
-      if (vid.$wmPause && vid.querySelector("video")?.volume > 0 && !vid.querySelector("video")?.muted) {
+      if (
+        vid.$wmPause &&
+        vid.querySelector("video")?.volume > 0 &&
+        !vid.querySelector("video")?.muted
+      ) {
         vid.$wmPause();
       }
     });
@@ -1218,7 +1227,10 @@ class wmTabs {
   openTab(tabId) {
     // Safety check to ensure the instance is fully initialized
     if (!this.settings || !this.tabs || this.tabs.length === 0) {
-      console.warn("wmTabs instance not fully initialized. Cannot open tab:", tabId);
+      console.warn(
+        "wmTabs instance not fully initialized. Cannot open tab:",
+        tabId
+      );
       return;
     }
 
@@ -1325,7 +1337,6 @@ class wmTabs {
     });
   }
   addEditModeObserver() {
-
     const isBackend = window.self !== window.top;
     if (wmTabs.isEditModeEventListenerSet || !isBackend) return;
 
