@@ -816,6 +816,17 @@ body.sqs-edit-mode-active
   }
 }
 
+/*Moving Tabs for initialization*/
+.wm-tabs.moving-tabs-for-initialization {
+  position: absolute !important;
+  z-index: -1 !important;
+  height: 0px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+
 /*Default Settings*/
 .wm-tabs {
   /*Tabs Navigation*/
