@@ -112,6 +112,7 @@ class wmTabs {
   }
   async init() {
     this.runHooks("beforeInit");
+    wm$.emitEvent(`${wmTabs.pluginTitle}:beforeInit`);
     this.el.dataset.navigationType = this.getNavigationType();
     this.buildStructure();
     if (this.source) {
@@ -131,6 +132,8 @@ class wmTabs {
       this.moveFromTargets();
       if (this.settings.isSectionsAdjusted) this.addEditModeObserver();
     }
+    wm$.emitEvent(`${wmTabs.pluginTitle}:afterBuild`);
+    
 
     // Edge To Edge
     if (this.settings.edgeToEdge) {
@@ -210,7 +213,6 @@ class wmTabs {
         originalParent.appendChild(this.el);
         this.el.classList.remove("moving-tabs-for-initialization");
       }
-
 
       wm$?.emitEvent(`${wmTabs.pluginTitle}:ready`);
       this.loadingState = "complete";
