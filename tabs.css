@@ -826,6 +826,12 @@ body.sqs-edit-mode-active
   visibility: hidden !important;
 }
 
+/*Floating Blocks in Class Engine*/
+.fluid-engine .wm-tabs .sqs-layout .sqs-block[class*=float-right],
+.fluid-engine .wm-tabs .sqs-layout  .sqs-block[class*=float-left]{
+  width:inherit;
+}
+
 
 /*Default Settings*/
 .wm-tabs {
