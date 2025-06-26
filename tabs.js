@@ -1,4 +1,3 @@
-
 /* =========
   Squarespace Tabs Plugin
   A Tabs Plugin for Squarespace
@@ -108,6 +107,7 @@ class wmTabs {
     this.hasSelectInBreakpoints = Object.values(this.settings.breakpoints).some(
       breakpoint => breakpoint.navigationType === "select"
     );
+    
     this.init();
   }
   async init() {
@@ -149,19 +149,16 @@ class wmTabs {
         });
       });
     }
-
     this.setStyles();
     this.setIsNavMaxWidth();
     this.bindEvents();
     this.handleTabsNavigationIndicatorsDisplay();
-
     //Open Initial Tab
     this.setNavWidth();
     this.activeTab = this.tabs[this.getInitialTabIndex()];
     this.openTab(this.activeTab.id);
     this.setActiveIndicator();
     this.removeGlobalAnimations();
-
     //Finalize Loading
     this.el.dataset.loadingState = "loaded";
 
@@ -224,6 +221,7 @@ class wmTabs {
       this.setActiveIndicator();
       this.setTabHeights();
       this.removeGlobalAnimations();
+
     }, 650);
     this.runHooks("afterInit");
   }
@@ -1261,15 +1259,23 @@ class wmTabs {
       }
     });
 
-    if (this.settings.updateUrl && this.settings.setInitialUrl) {
-      this.setUrlHash(this.activeTab.id);
-    }
+    // Store the URL update decision before modifying setInitialUrl
+    const shouldUpdateUrl = this.settings.updateUrl && this.settings.setInitialUrl;
+    
+    // Handle all positioning and layout first
     this.settings.setInitialUrl = true;
     this.pauseAllVideos();
     this.scrollTabIntoView();
     this.scrollBackToTop();
     this.setActiveIndicator();
     this.tabsOffset = this.activeTab.panel.offsetLeft;
+
+    // Update URL hash after all positioning is complete to avoid layout interference
+    if (shouldUpdateUrl) {
+      requestAnimationFrame(() => {
+        this.setUrlHash(this.activeTab.id);
+      });
+    }
 
     this.activeTab.panel.focus();
     this.runHooks("afterOpenTab", tabId);
