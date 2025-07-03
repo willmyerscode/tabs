@@ -1235,6 +1235,10 @@ class wmTabs {
     }
 
     this.runHooks("beforeOpenTab", tabId);
+    wm$?.emitEvent(`${wmTabs.pluginTitle}:beforeOpenTab`, {
+      tabId: tabId,
+      instance: this
+    });
 
     const activeTab = this.tabs.filter(tab => tab.id === tabId)[0];
     if (!activeTab) console.debug("No Tab!");
@@ -1278,6 +1282,10 @@ class wmTabs {
     }
 
     this.activeTab.panel.focus();
+    wm$?.emitEvent(`${wmTabs.pluginTitle}:afterOpenTab`, {
+      tabId: tabId,
+      instance: this
+    });
     this.runHooks("afterOpenTab", tabId);
   }
   focusNextTab() {
