@@ -61,6 +61,7 @@
   flex-grow: 1;
   flex-shrink: 0;
   flex-basis: 100%;
+  width: 100%;
   position: relative;
   transform: translateZ(0);
 }
@@ -199,9 +200,10 @@ body:not(.sqs-edit-mode-active)
 .wm-tabs[data-navigation-type="vertical"] > * > .tabs-content {
   padding-left: var(
     --tab-content-padding-left,
-    var(--tab-content-padding-start)
+    var(--tab-content-padding-start, 0px)
   );
 }
+
 .wm-tabs[data-navigation-type="vertical"] > .tabs-wrapper {
   display: grid;
   grid-template-columns: var(--vertical-tabs-navbar-width) 1fr;
