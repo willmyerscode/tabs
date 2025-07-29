@@ -443,7 +443,7 @@ class wmTabs {
 
         // Only set the dataset.target if we find a valid nextSection
         if (nextSection) {
-          btn.dataset.target = `#sections > section[data-section-id="${nextSection.dataset.sectionId}"].page-section`;
+          btn.dataset.target = `section[data-section-id="${nextSection.dataset.sectionId}"].page-section`;
         } else {
           console.warn("No valid next section found for button:", btn);
         }
