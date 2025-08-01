@@ -63,6 +63,7 @@ class wmTabs {
       afterOpenTab: [],
     },
     disableAutoScroll: false,
+    enableAutoScrollOnLoad: true,
   };
   static get userSettings() {
     return window[wmTabs.pluginTitle + "Settings"] || {};
@@ -75,11 +76,7 @@ class wmTabs {
     }
     this.el = el;
     this.source = el.dataset.source;
-    if (
-      this.el.parentElement.closest(
-        `[data-wm-plugin="tabs"][data-source="${this.source}"]`
-      )
-    ) {
+    if (this.el.parentElement.closest(`[data-wm-plugin="tabs"][data-source="${this.source}"]`)) {
       console.error("Recursive tabs plugin detected");
       return;
     }
@@ -91,23 +88,14 @@ class wmTabs {
     if (this.el.querySelector("button")) {
       this.installationMethod = "sections";
     }
-    this.settings = wm$.deepMerge(
-      {},
-      wmTabs.defaultSettings,
-      wmTabs.userSettings,
-      this.instanceSettings
-    );
+    this.settings = wm$.deepMerge({}, wmTabs.defaultSettings, wmTabs.userSettings, this.instanceSettings);
     this.items, this.type;
     this.tabs = [];
     this._navigaitonType = "";
     this.tweaks = Static.SQUARESPACE_CONTEXT.tweakJSON;
-    this.hasAccordionInBreakpoints = Object.values(
-      this.settings.breakpoints
-    ).some(breakpoint => breakpoint.navigationType === "accordion");
-    this.hasSelectInBreakpoints = Object.values(this.settings.breakpoints).some(
-      breakpoint => breakpoint.navigationType === "select"
-    );
-    
+    this.hasAccordionInBreakpoints = Object.values(this.settings.breakpoints).some(breakpoint => breakpoint.navigationType === "accordion");
+    this.hasSelectInBreakpoints = Object.values(this.settings.breakpoints).some(breakpoint => breakpoint.navigationType === "select");
+
     this.init();
   }
   async init() {
@@ -121,10 +109,7 @@ class wmTabs {
       });
       this.items = items;
       this.type = type;
-      const tabLimit =
-        typeof this.settings.tabLimit === "number"
-          ? Math.min(this.settings.tabLimit, items.length)
-          : items.length;
+      const tabLimit = typeof this.settings.tabLimit === "number" ? Math.min(this.settings.tabLimit, items.length) : items.length;
       this.tabs = items.slice(0, tabLimit).map(item => ({item}));
 
       this.injectHTML();
@@ -133,15 +118,12 @@ class wmTabs {
       if (this.settings.isSectionsAdjusted) this.addEditModeObserver();
     }
     wm$.emitEvent(`${wmTabs.pluginTitle}:afterBuild`);
-    
 
     // Edge To Edge
     if (this.settings.edgeToEdge) {
       this.el.classList.add("edge-to-edge");
       this.tabs.forEach(tab => {
-        const sections = tab.panel.querySelectorAll(
-          "section.page-section[data-fluid-engine-section]"
-        );
+        const sections = tab.panel.querySelectorAll("section.page-section[data-fluid-engine-section]");
         sections.forEach(section => {
           const fluidEngine = section.querySelector(".fluid-engine");
           const columnGap = getComputedStyle(fluidEngine).columnGap;
@@ -172,9 +154,7 @@ class wmTabs {
 
     async function handleDOMReady() {
       const sections = document.querySelector("#sections");
-      const lastSection = document.querySelector(
-        "#sections > section:last-child .content-wrapper"
-      );
+      const lastSection = document.querySelector("#sections > section:last-child .content-wrapper");
 
       let originalParent = this.el.parentNode;
       let wasAppended = false;
@@ -206,7 +186,7 @@ class wmTabs {
         console.error("Error during initialization:", error);
       }
 
-      if (wasAppended) {  
+      if (wasAppended) {
         originalParent.appendChild(this.el);
         this.el.classList.remove("moving-tabs-for-initialization");
       }
@@ -221,7 +201,6 @@ class wmTabs {
       this.setActiveIndicator();
       this.setTabHeights();
       this.removeGlobalAnimations();
-
     }, 650);
     this.runHooks("afterInit");
   }
@@ -238,6 +217,15 @@ class wmTabs {
     this.hasAccordionInBreakpoints ? this.addAccordionButtonClickEvent() : null;
     this.el.addEventListener("click", e => {
       if (!e.target.closest(".tab-panel")) return;
+
+      const clickedLink = e.target.closest("a[href*='#']");
+      if (clickedLink) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.handleAnchorLinkClickInTab(clickedLink);
+        return; // Don't recalculate heights for anchor links
+      }
+
       this.setTabHeights();
     });
   }
@@ -307,10 +295,7 @@ class wmTabs {
       selectNavigation.appendChild(selectButtonContainer);
       selectButtonContainer.appendChild(selectButton);
       selectButton.appendChild(selectButtonText);
-      selectButton.insertAdjacentHTML(
-        "beforeend",
-        this.settings.selectButtonIcon
-      );
+      selectButton.insertAdjacentHTML("beforeend", this.settings.selectButtonIcon);
       selectItemsContainer.appendChild(selectItemsWrapper);
       selectNavigation.appendChild(selectItemsContainer);
       wrapper.appendChild(selectNavigationContainer);
@@ -386,8 +371,7 @@ class wmTabs {
       tabButton.setAttribute("aria-selected", "false"); // Not selected initially
       const title = item.title;
       tab.innerText = item.title;
-      if (this.settings.tabImages)
-        tabButton.innerHTML = `<div class="tab-button-image"><span class="img-spacer"></span><img src="${item.assetUrl}" width="150" height="150"/></div>`;
+      if (this.settings.tabImages) tabButton.innerHTML = `<div class="tab-button-image"><span class="img-spacer"></span><img src="${item.assetUrl}" width="150" height="150"/></div>`;
       tabButton.innerHTML += `<${this.settings.tabButtonTag} class="tab-title">${title}</${this.settings.tagButtonTag}>`;
       tabButtonsFragment.appendChild(tabButton);
       tab.button = tabButton;
@@ -433,11 +417,7 @@ class wmTabs {
         let nextSection = closestSection.nextElementSibling;
 
         // Loop to find the next valid page-section that is not a placeholder or reference element
-        while (
-          nextSection &&
-          (!nextSection.matches(".page-section") ||
-            nextSection.classList.contains("placeholder"))
-        ) {
+        while (nextSection && (!nextSection.matches(".page-section") || nextSection.classList.contains("placeholder"))) {
           nextSection = nextSection.nextElementSibling;
         }
 
@@ -508,10 +488,7 @@ class wmTabs {
           span.textContent = node.nodeValue;
           tabButton.replaceChild(span, node);
           tab.innerText = node.nodeValue;
-        } else if (
-          node.nodeType === Node.ELEMENT_NODE &&
-          node.tagName.toLowerCase() === "img"
-        ) {
+        } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === "img") {
           const imageWrapper = document.createElement("div");
           imageWrapper.classList.add("tab-button-image");
           imageWrapper.append(node);
@@ -549,27 +526,19 @@ class wmTabs {
   addStickyNavScrollEvent() {
     if (this.settings.stickyNav) {
       this.elements.pageHeader = document.querySelector("#header");
-      this.el.style.setProperty(
-        "--top-offset",
-        this.settings.stickyNavOffset + "px"
-      );
+      this.el.style.setProperty("--top-offset", this.settings.stickyNavOffset + "px");
 
       const onScroll = () => {
         const rect = this.el.getBoundingClientRect();
 
         if (this.tweaks["tweak-fixed-header"] === "true") {
-          const headerBottom =
-            this.elements.pageHeader?.getBoundingClientRect().bottom || 0;
+          const headerBottom = this.elements.pageHeader?.getBoundingClientRect().bottom || 0;
           const offsetAmt = this.settings.stickyNavOffset + headerBottom;
-          rect.top <= offsetAmt
-            ? this.el.classList.add("is-sticky")
-            : this.el.classList.remove("is-sticky");
+          rect.top <= offsetAmt ? this.el.classList.add("is-sticky") : this.el.classList.remove("is-sticky");
 
           this.el.style.setProperty("--nav-sticky-offset", headerBottom + "px");
         } else {
-          rect.top <= this.settings.stickyNavOffset
-            ? this.el.classList.add("is-sticky")
-            : this.el.classList.remove("is-sticky");
+          rect.top <= this.settings.stickyNavOffset ? this.el.classList.add("is-sticky") : this.el.classList.remove("is-sticky");
           this.el.style.setProperty("--nav-sticky-offset", "0px");
         }
       };
@@ -597,10 +566,8 @@ class wmTabs {
     const elRect = this.el.getBoundingClientRect();
 
     if (elRect.top <= -1) {
-      const targetScrollY =
-        window.scrollY + elRect.top - this.settings.scrollBackOffset;
-      const behavior =
-        this.settings.scrollBackBehavior === "smooth" ? "smooth" : "auto";
+      const targetScrollY = window.scrollY + elRect.top - this.settings.scrollBackOffset;
+      const behavior = this.settings.scrollBackBehavior === "smooth" ? "smooth" : "auto";
 
       window.scrollTo({
         top: targetScrollY,
@@ -638,22 +605,21 @@ class wmTabs {
       return "#" + encodedText;
     }
 
-    const matchingTabIndex = this.tabs.findIndex(
-      tab => window.location.hash === hashedValueForUrl(tab.innerText)
-    );
+    const matchingTabIndex = this.tabs.findIndex(tab => window.location.hash === hashedValueForUrl(tab.innerText));
 
     let matchingTab;
     if (matchingTabIndex !== -1) {
       matchingTab = matchingTabIndex;
       const elRect = this.el.getBoundingClientRect();
-      const targetScrollY =
-        window.scrollY + elRect.top - this.settings.scrollBackOffset;
+      const targetScrollY = window.scrollY + elRect.top - this.settings.scrollBackOffset;
       const behavior = "smooth";
 
+      if (this.settings.enableAutoScrollOnLoad) {
       window.scrollTo({
-        top: targetScrollY,
-        behavior: behavior,
-      });
+          top: targetScrollY,
+          behavior: behavior,
+        });
+      }
     } else {
       matchingTab = 0;
     }
@@ -703,22 +669,12 @@ class wmTabs {
     const left = btn.offsetLeft;
     const top = btn.offsetTop + 0.5;
 
-    const navPaddingInline = window.getComputedStyle(
-      this.elements.nav
-    ).paddingInlineStart;
-    const navPaddingBlock = window.getComputedStyle(
-      this.elements.nav
-    ).paddingBlockStart;
+    const navPaddingInline = window.getComputedStyle(this.elements.nav).paddingInlineStart;
+    const navPaddingBlock = window.getComputedStyle(this.elements.nav).paddingBlockStart;
 
     this.el.style.setProperty("--tab-button-active-width", width + "px");
-    this.el.style.setProperty(
-      "--tab-button-active-left",
-      left - parseInt(navPaddingInline) + "px"
-    );
-    this.el.style.setProperty(
-      "--tab-button-active-top",
-      top - parseInt(navPaddingBlock) + "px"
-    );
+    this.el.style.setProperty("--tab-button-active-left", left - parseInt(navPaddingInline) + "px");
+    this.el.style.setProperty("--tab-button-active-top", top - parseInt(navPaddingBlock) + "px");
     this.el.style.setProperty("--tab-button-active-height", height + "px");
   }
   addSelectEvents() {
@@ -747,14 +703,10 @@ class wmTabs {
   }
   addTabNavigationClickEvent() {
     this.elements.indicatorStart.addEventListener("click", () => {
-      this.settings.overflowIndicatorAction === "move"
-        ? this.prevTab()
-        : this.moveTabsNavigation(-50);
+      this.settings.overflowIndicatorAction === "move" ? this.prevTab() : this.moveTabsNavigation(-50);
     });
     this.elements.indicatorEnd.addEventListener("click", () => {
-      this.settings.overflowIndicatorAction === "move"
-        ? this.nextTab()
-        : this.moveTabsNavigation(50);
+      this.settings.overflowIndicatorAction === "move" ? this.nextTab() : this.moveTabsNavigation(50);
     });
   }
   handleTabsNavigationIndicatorsDisplay() {
@@ -933,13 +885,8 @@ class wmTabs {
 
     // Touch and Mouse Down event handler
     function startSwipe(event) {
-      if (
-        event.target.closest("img, button, a") &&
-        event.type.includes("mouse")
-      )
-        return;
-      if (event.target.closest("a, button") && event.type.includes("touch"))
-        return;
+      if (event.target.closest("img, button, a") && event.type.includes("mouse")) return;
+      if (event.target.closest("a, button") && event.type.includes("touch")) return;
       isDragging = true;
       startX = getPositionX(event);
       startY = getPositionY(event);
@@ -1027,16 +974,12 @@ class wmTabs {
 
     // Helper function to get the X position of touch or mouse event
     function getPositionX(event) {
-      return event.type.includes("mouse")
-        ? event.pageX
-        : event.touches[0].clientX;
+      return event.type.includes("mouse") ? event.pageX : event.touches[0].clientX;
     }
 
     // Helper function to get the Y position of touch or mouse event
     function getPositionY(event) {
-      return event.type.includes("mouse")
-        ? event.pageY
-        : event.touches[0].clientY;
+      return event.type.includes("mouse") ? event.pageY : event.touches[0].clientY;
     }
 
     // Animation function to smoothly update the position
@@ -1091,19 +1034,12 @@ class wmTabs {
   }
   setTabHeights() {
     const setHeight = () => {
-      this.elements.tabsContentWrapper.style.height =
-        this.activeTab.content.clientHeight + "px";
+      this.elements.tabsContentWrapper.style.height = this.activeTab.content.clientHeight + "px";
       if (this.el.parentElement.closest('[data-wm-plugin="tabs"]')) {
-        this.el.parentElement
-          .closest('[data-wm-plugin="tabs"]')
-          ?.wmTabs?.setTabHeights();
+        this.el.parentElement.closest('[data-wm-plugin="tabs"]')?.wmTabs?.setTabHeights();
       }
     };
-    if (
-      this.navigationType === "horizontal" ||
-      this.navigationType === "vertical" ||
-      this.navigationType === "select"
-    ) {
+    if (this.navigationType === "horizontal" || this.navigationType === "vertical" || this.navigationType === "select") {
       setHeight();
 
       window.setTimeout(() => {
@@ -1123,9 +1059,7 @@ class wmTabs {
 
     // Function to extract HSL values from HSLA string
     const extractHSLValues = hslaValue => {
-      const match = hslaValue.match(
-        /hsla?\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%/
-      );
+      const match = hslaValue.match(/hsla?\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%/);
       return match ? `${match[1]},${match[2]}%,${match[3]}%` : "";
     };
 
@@ -1154,14 +1088,11 @@ class wmTabs {
   setIsNavMaxWidth() {
     function isFullWidth(element) {
       const rect = element.getBoundingClientRect();
-      const windowWidth =
-        window.innerWidth || document.documentElement.clientWidth;
+      const windowWidth = window.innerWidth || document.documentElement.clientWidth;
       const tolerance = 3;
       return Math.abs(rect.width - windowWidth) <= tolerance;
     }
-    isFullWidth(this.el)
-      ? this.el.classList.add("full-width")
-      : this.el.classList.remove("full-width");
+    isFullWidth(this.el) ? this.el.classList.add("full-width") : this.el.classList.remove("full-width");
   }
   addNextAndPrevTabButtonEvents() {
     const handleNextClick = e => {
@@ -1201,43 +1132,32 @@ class wmTabs {
   pauseAllVideos() {
     const videos = this.el.querySelectorAll(".sqs-block-video");
     videos.forEach(vid => {
-      if (
-        vid.$wmPause &&
-        vid.querySelector("video")?.volume > 0 &&
-        !vid.querySelector("video")?.muted
-      ) {
+      if (vid.$wmPause && vid.querySelector("video")?.volume > 0 && !vid.querySelector("video")?.muted) {
         vid.$wmPause();
       }
     });
   }
   nextTab() {
-    const currentIndex = this.tabs.findIndex(
-      tab => tab.id === this.activeTab.id
-    );
+    const currentIndex = this.tabs.findIndex(tab => tab.id === this.activeTab.id);
     const nextIndex = (currentIndex + 1) % this.tabs.length;
     this.openTab(this.tabs[nextIndex].id);
   }
   prevTab() {
-    const currentIndex = this.tabs.findIndex(
-      tab => tab.id === this.activeTab.id
-    );
+    const currentIndex = this.tabs.findIndex(tab => tab.id === this.activeTab.id);
     const prevIndex = (currentIndex - 1 + this.tabs.length) % this.tabs.length;
     this.openTab(this.tabs[prevIndex].id);
   }
   openTab(tabId) {
     // Safety check to ensure the instance is fully initialized
     if (!this.settings || !this.tabs || this.tabs.length === 0) {
-      console.warn(
-        "wmTabs instance not fully initialized. Cannot open tab:",
-        tabId
-      );
+      console.warn("wmTabs instance not fully initialized. Cannot open tab:", tabId);
       return;
     }
 
     this.runHooks("beforeOpenTab", tabId);
     wm$?.emitEvent(`${wmTabs.pluginTitle}:beforeOpenTab`, {
       tabId: tabId,
-      instance: this
+      instance: this,
     });
 
     const activeTab = this.tabs.filter(tab => tab.id === tabId)[0];
@@ -1250,8 +1170,7 @@ class wmTabs {
         tab.panel.setAttribute("aria-hidden", "false");
         tab.panel.classList.add("active");
         tab.selectItem?.classList.add("active");
-        if (this.elements.selectButtonText)
-          this.elements.selectButtonText.innerText = tab.innerText;
+        if (this.elements.selectButtonText) this.elements.selectButtonText.innerText = tab.innerText;
         this.setTabHeights();
       } else {
         tab.active = false;
@@ -1265,7 +1184,7 @@ class wmTabs {
 
     // Store the URL update decision before modifying setInitialUrl
     const shouldUpdateUrl = this.settings.updateUrl && this.settings.setInitialUrl;
-    
+
     // Handle all positioning and layout first
     this.settings.setInitialUrl = true;
     this.pauseAllVideos();
@@ -1284,7 +1203,7 @@ class wmTabs {
     this.activeTab.panel.focus();
     wm$?.emitEvent(`${wmTabs.pluginTitle}:afterOpenTab`, {
       tabId: tabId,
-      instance: this
+      instance: this,
     });
     this.runHooks("afterOpenTab", tabId);
   }
@@ -1298,8 +1217,7 @@ class wmTabs {
   focusPreviousTab() {
     const focusedIndex = this.getFocusedTabIndex();
     if (focusedIndex !== -1) {
-      const prevIndex =
-        (focusedIndex - 1 + this.tabs.length) % this.tabs.length;
+      const prevIndex = (focusedIndex - 1 + this.tabs.length) % this.tabs.length;
       this.tabs[prevIndex].button.focus();
     }
   }
@@ -1309,8 +1227,7 @@ class wmTabs {
   focusFirstTabbableElementOrNextTab(tab) {
     const panel = tab.panel;
     const index = this.tabs.findIndex(t => t === tab);
-    const tabbableSelector =
-      'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])';
+    const tabbableSelector = 'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])';
     const tabbableElements = panel.querySelectorAll(tabbableSelector);
 
     if (tabbableElements.length > 0) {
@@ -1325,22 +1242,11 @@ class wmTabs {
   }
   removeGlobalAnimations() {
     // Select all elements with any of the specified classes
-    let els = this.el.querySelectorAll(
-      ".slideIn, .fadeIn, .scaleIn, .flexIn, .preFade, .preScale, .preFlex, .preSlide"
-    );
+    let els = this.el.querySelectorAll(".slideIn, .fadeIn, .scaleIn, .flexIn, .preFade, .preScale, .preFlex, .preSlide");
     els = this.el.querySelectorAll(".tabs-header .tab-title");
 
     // List of classes to remove
-    const classesToRemove = [
-      "slideIn",
-      "fadeIn",
-      "scaleIn",
-      "flexIn",
-      "preFade",
-      "preScale",
-      "preFlex",
-      "preSlide",
-    ];
+    const classesToRemove = ["slideIn", "fadeIn", "scaleIn", "flexIn", "preFade", "preScale", "preFlex", "preSlide"];
 
     // Iterate over each selected element and remove the specified classes
     els.forEach(el => {
@@ -1400,6 +1306,26 @@ class wmTabs {
       }
     });
   }
+  handleAnchorLinkClickInTab(clickedLink) {
+    // Handle anchor link navigation within the tab
+    const href = clickedLink.getAttribute("href");
+    if (href && href.startsWith("#")) {
+      const targetId = href.substring(1);
+      const targetElement = this.activeTab.panel.querySelector(`#${targetId}, [name="${targetId}"]`);
+
+      if (targetElement) {
+        // Get the absolute position of the target element relative to the page
+        const targetRect = targetElement.getBoundingClientRect();
+        const scrollTop = window.scrollY + targetRect.top;
+
+        // Scroll the window to the target element
+        window.scrollTo({
+          top: scrollTop,
+          behavior: "smooth",
+        });
+      }
+    }
+  }
   get contentHeight() {
     return this._contentHeight;
   }
@@ -1429,12 +1355,10 @@ class wmTabs {
     const dataAttributes = {};
 
     if (this.el.dataset.desktopNavigationType) {
-      this.el.dataset.breakpoints__767__navigationType =
-        this.el.dataset.desktopNavigationType;
+      this.el.dataset.breakpoints__767__navigationType = this.el.dataset.desktopNavigationType;
     }
     if (this.el.dataset.mobileNavigationType) {
-      this.el.dataset.breakpoints__0__navigationType =
-        this.el.dataset.mobileNavigationType;
+      this.el.dataset.breakpoints__0__navigationType = this.el.dataset.mobileNavigationType;
     }
 
     // Function to set value in a nested object based on key path
@@ -1462,9 +1386,7 @@ class wmTabs {
   set tabsOffset(offset) {
     requestAnimationFrame(() => {
       this._overflowTabsOffset = offset;
-      this.elements.tabsContentWrapper.style.transform = `translateX(${
-        offset * -1
-      }px)`;
+      this.elements.tabsContentWrapper.style.transform = `translateX(${offset * -1}px)`;
     });
   }
   get loadingState() {
@@ -1478,40 +1400,28 @@ class wmTabs {
   }
   set navWidth(width) {
     this._navWidth = width;
-    this.elements.nav.style.setProperty(
-      "--nav-scroll-width",
-      this._navWidth + "px"
-    );
+    this.elements.nav.style.setProperty("--nav-scroll-width", this._navWidth + "px");
   }
   get navFullWidth() {
     return this._navFullWidth;
   }
   set navFullWidth(width) {
     this._navFullWidth = width;
-    this.elements.nav.style.setProperty(
-      "--nav-full-width",
-      this._navFullWidth + "px"
-    );
+    this.elements.nav.style.setProperty("--nav-full-width", this._navFullWidth + "px");
   }
   get navFullHeight() {
     return this._navFullHeight;
   }
   set navFullHeight(height) {
     this._navFullHeight = height;
-    this.elements.nav.style.setProperty(
-      "--nav-full-height",
-      this._navFullHeight + "px"
-    );
+    this.elements.nav.style.setProperty("--nav-full-height", this._navFullHeight + "px");
   }
   get navHeight() {
     return this._navHeight;
   }
   set navHeight(height) {
     this._navHeight = height;
-    this.elements.nav.style.setProperty(
-      "--nav-scroll-height",
-      this._navHeight + "px"
-    );
+    this.elements.nav.style.setProperty("--nav-scroll-height", this._navHeight + "px");
   }
   addGlobalLinkClickListener() {
     document.addEventListener("click", event => {
@@ -1538,7 +1448,6 @@ class wmTabs {
     });
   }
   scrollToTabsAndOpen(tabId) {
-    // Scroll to the tabs component
     this.el.scrollIntoView({behavior: "smooth", block: "start"});
 
     // Wait for the scroll to complete before opening the tab
