@@ -220,9 +220,7 @@ class wmTabs {
 
       const clickedLink = e.target.closest("a[href*='#']");
       if (clickedLink) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.handleAnchorLinkClickInTab(clickedLink);
+        this.handleAnchorLinkClickInTab(clickedLink, e);
         return; // Don't recalculate heights for anchor links
       }
 
@@ -1306,14 +1304,18 @@ class wmTabs {
       }
     });
   }
-  handleAnchorLinkClickInTab(clickedLink) {
+  handleAnchorLinkClickInTab(clickedLink, e) {
     // Handle anchor link navigation within the tab
     const href = clickedLink.getAttribute("href");
     if (href && href.startsWith("#")) {
       const targetId = href.substring(1);
-      const targetElement = this.activeTab.panel.querySelector(`#${targetId}, [name="${targetId}"]`);
+      // Escape special characters in CSS selectors
+      const escapedTargetId = CSS.escape(targetId);
+      const targetElement = this.activeTab.panel.querySelector(`#${escapedTargetId}, [name="${escapedTargetId}"]`);
 
       if (targetElement) {
+        e.preventDefault();
+        e.stopPropagation();
         // Get the absolute position of the target element relative to the page
         const targetRect = targetElement.getBoundingClientRect();
         const scrollTop = window.scrollY + targetRect.top;
