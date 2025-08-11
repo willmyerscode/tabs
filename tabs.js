@@ -597,13 +597,11 @@ class wmTabs {
     return newText;
   }
   getInitialTabIndex() {
-    function hashedValueForUrl(text) {
-      const filteredText = text.replace(/[^a-zA-Z0-9_-]/g, "-");
-      const encodedText = encodeURIComponent(filteredText.trim().toLowerCase());
-      return "#" + encodedText;
+    if (!window.location.hash) {
+      return 0;
     }
 
-    const matchingTabIndex = this.tabs.findIndex(tab => window.location.hash === hashedValueForUrl(tab.innerText));
+    const matchingTabIndex = this.tabs.findIndex(tab => window.location.hash === '#' + tab.id);
 
     let matchingTab;
     if (matchingTabIndex !== -1) {
@@ -764,6 +762,7 @@ class wmTabs {
     }
   }
   scrollTabIntoView() {
+
     // Add a new setting to control auto-scrolling
     if (this.settings.disableAutoScroll) return;
 
