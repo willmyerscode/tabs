@@ -92,6 +92,7 @@ class wmTabs {
     this.items, this.type;
     this.tabs = [];
     this._navigaitonType = "";
+    this.hasLoaded = false;
     this.tweaks = Static.SQUARESPACE_CONTEXT.tweakJSON;
     this.hasAccordionInBreakpoints = Object.values(this.settings.breakpoints).some(breakpoint => breakpoint.navigationType === "accordion");
     this.hasSelectInBreakpoints = Object.values(this.settings.breakpoints).some(breakpoint => breakpoint.navigationType === "select");
@@ -201,6 +202,7 @@ class wmTabs {
       this.setActiveIndicator();
       this.setTabHeights();
       this.removeGlobalAnimations();
+      this.hasLoaded = true;
     }, 650);
     this.runHooks("afterInit");
   }
@@ -561,6 +563,7 @@ class wmTabs {
   }
   scrollBackToTop() {
     if (!this.settings.scrollBackToTop) return;
+    if (!this.hasLoaded) return;
     const elRect = this.el.getBoundingClientRect();
 
     if (elRect.top <= -1) {
@@ -601,7 +604,7 @@ class wmTabs {
       return 0;
     }
 
-    const matchingTabIndex = this.tabs.findIndex(tab => window.location.hash === '#' + tab.id);
+    const matchingTabIndex = this.tabs.findIndex(tab => window.location.hash === "#" + tab.id);
 
     let matchingTab;
     if (matchingTabIndex !== -1) {
@@ -611,7 +614,7 @@ class wmTabs {
       const behavior = "smooth";
 
       if (this.settings.enableAutoScrollOnLoad) {
-      window.scrollTo({
+        window.scrollTo({
           top: targetScrollY,
           behavior: behavior,
         });
@@ -762,7 +765,6 @@ class wmTabs {
     }
   }
   scrollTabIntoView() {
-
     // Add a new setting to control auto-scrolling
     if (this.settings.disableAutoScroll) return;
 
