@@ -885,7 +885,7 @@ class wmTabs {
     // Touch and Mouse Down event handler
     function startSwipe(event) {
       if (event.target.closest("img, button, a") && event.type.includes("mouse")) return;
-      if (event.target.closest("a, button") && event.type.includes("touch")) return;
+      if (event.target.closest("a, button, input, textarea, select") && event.type.includes("touch")) return;
       isDragging = true;
       startX = getPositionX(event);
       startY = getPositionY(event);
