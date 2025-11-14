@@ -225,10 +225,10 @@ body:not(.sqs-edit-mode-active)
   height: 100%;
   width: 100%;
 }
-.wm-tabs[data-navigation-type="vertical"] .nav-container {
+.wm-tabs[data-navigation-type="vertical"] > * > .tabs-header .nav-container {
   width: 100%;
 }
-.wm-tabs[data-navigation-type="vertical"] nav {
+.wm-tabs[data-navigation-type="vertical"] > * > .tabs-header nav {
   display: flex;
   flex-direction: column;
   position: relative;
