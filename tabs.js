@@ -7,6 +7,7 @@
 class wmTabs {
   static pluginTitle = "wmTabs";
   static isEditModeEventListenerSet = false;
+  static instances = [];
   static defaultSettings = {
     tabImages: false,
     tabButtonTag: "h4",
@@ -68,6 +69,33 @@ class wmTabs {
   static get userSettings() {
     return window[wmTabs.pluginTitle + "Settings"] || {};
   }
+
+  /**
+   * Deconstruct all tab instances (used when entering edit mode)
+   */
+  static deconstruct() {
+    wmTabs.instances.forEach(instance => {
+      if (instance && typeof instance.destroy === "function") {
+        instance.destroy();
+      }
+    });
+
+    // Clear the instances array
+    wmTabs.instances = [];
+
+    // Clear original positions map
+    if (wmTabs.originalPositions) {
+      wmTabs.originalPositions.clear();
+    }
+
+    // Reload Squarespace lifecycle
+    try {
+      wm$?.reloadSquarespaceLifecycle();
+    } catch (error) {
+      console.error("Error reloading Squarespace lifecycle:", error);
+    }
+  }
+
   constructor(el) {
     if (el.dataset.loadingState) {
       return;
@@ -116,8 +144,9 @@ class wmTabs {
       this.injectHTML();
     } else {
       this.moveFromTargets();
-      if (this.settings.isSectionsAdjusted) this.addEditModeObserver();
+      // if (this.settings.isSectionsAdjusted) this.addEditModeObserver();
     }
+    this.addEditModeObserver();
     wm$.emitEvent(`${wmTabs.pluginTitle}:afterBuild`);
 
     // Edge To Edge
@@ -1261,37 +1290,52 @@ class wmTabs {
     const isBackend = window.self !== window.top;
     if (wmTabs.isEditModeEventListenerSet || !isBackend) return;
 
-    let deconstructed = false;
-
-    // Observe changes to the body's class attribute
-    const bodyObserver = new MutationObserver(async mutations => {
-      for (const mutation of mutations) {
+    const bodyObserver = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
         if (mutation.attributeName === "class") {
-          const classList = document.body.classList;
-          if (classList.contains("sqs-edit-mode-active")) {
-            if (!deconstructed && wmTabs.originalPositions) {
-              deconstructed = true;
-              wmTabs.originalPositions.forEach((info, section) => {
-                section.remove();
-              });
-              wmTabs.originalPositions.clear();
-              try {
-                await wm$.reloadSquarespaceLifecycle();
-              } catch (error) {
-                console.error("Error reloading Squarespace lifecycle:", error);
-              }
-              bodyObserver.disconnect();
-            }
+          if (document.body.classList.contains("sqs-edit-mode-active")) {
+            wmTabs.deconstruct();
+            bodyObserver.disconnect();
           }
         }
-      }
+      });
     });
 
     bodyObserver.observe(document.body, {
       attributes: true,
+      attributeFilter: ["class"],
     });
 
     wmTabs.isEditModeEventListenerSet = true;
+  }
+
+  /**
+   * Destroy this instance and restore/remove sections appropriately
+   */
+  destroy() {
+    // Handle moved sections - restore to original positions
+    if (wmTabs.originalPositions && wmTabs.originalPositions.size > 0) {
+      // Get sections that belong to this instance
+      this.tabs.forEach(tab => {
+        const sections = tab.content.querySelectorAll(".page-section");
+        sections.forEach(section => {
+          const info = wmTabs.originalPositions.get(section);
+          if (info && info.placeholder && info.placeholder.parentNode) {
+            // Restore section to its original position (replace placeholder)
+            info.placeholder.parentNode.insertBefore(section, info.placeholder);
+            info.placeholder.remove();
+            section.classList.remove("placeholder");
+            wmTabs.originalPositions.delete(section);
+          }
+        });
+      });
+    }
+
+    // Handle fetched sections - remove the tabs container entirely
+    // (fetched content didn't exist on the page before, so just remove it)
+    if (this.source && this.el && this.el.parentNode) {
+      this.el.remove();
+    }
   }
   runHooks(hookName, ...args) {
     // Safety check to handle cases where settings might be undefined
@@ -1469,11 +1513,13 @@ class wmTabs {
       // Only assign the instance if it was properly initialized
       if (instance.settings && instance.tabs !== undefined) {
         el.wmTabs = instance;
+        wmTabs.instances.push(instance);
       }
     });
   }
   window.wmTabs = {
     init: () => initTabs(),
+    deconstruct: () => wmTabs.deconstruct(),
   };
   window.wmTabs.init();
 })();
