@@ -328,6 +328,7 @@ body:not(.sqs-edit-mode-active)
   margin-block: auto;
   overflow: hidden;
   border-radius: var(--tab-button-image-border-radius);
+  flex-shrink: 0;
 }
 .wm-tabs nav .tab-button-image img {
   position: absolute;
