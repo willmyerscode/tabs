@@ -246,8 +246,12 @@ class wmTabs {
     this.addClickAndDragSwipeEvent();
     this.addGlobalLinkClickListener();
     this.hasAccordionInBreakpoints ? this.addAccordionButtonClickEvent() : null;
+    this.addContentScrollReset();
     this.el.addEventListener("click", e => {
       if (!e.target.closest(".tab-panel")) return;
+
+      // Ignore clicks that originated inside a nested (child) tabs instance
+      if (this.isEventFromNestedTabs(e)) return;
 
       const clickedLink = e.target.closest("a[href*='#']");
       if (clickedLink) {
@@ -375,6 +379,7 @@ class wmTabs {
       tabPanel.classList.add("tab-panel");
       tabPanel.setAttribute("role", "tabpanel"); // ARIA role for tab panel
       tabPanel.setAttribute("aria-hidden", "true"); // Initially hidden
+      tabPanel.setAttribute("tabindex", "-1"); // Make focusable but not in tab order
       const tabContent = document.createElement("div");
       tabContent.classList.add("tab-content");
 
@@ -398,6 +403,7 @@ class wmTabs {
       tabButton.setAttribute("role", "tab"); // ARIA role for tab button
       tabButton.setAttribute("aria-controls", tabPanel.id);
       tabButton.setAttribute("aria-selected", "false"); // Not selected initially
+      tabButton.setAttribute("tabindex", "-1"); // Initially not in tab order (only active tab will have tabindex="0")
       const title = item.title;
       tab.innerText = item.title;
       if (this.settings.tabImages) tabButton.innerHTML = `<div class="tab-button-image"><span class="img-spacer"></span><img src="${item.assetUrl}" width="150" height="150"/></div>`;
@@ -470,6 +476,7 @@ class wmTabs {
       tabPanel.classList.add("tab-panel");
       tabPanel.setAttribute("role", "tabpanel"); // ARIA role for tab panel
       tabPanel.setAttribute("aria-hidden", "true"); // Initially hidden
+      tabPanel.setAttribute("tabindex", "-1"); // Make focusable but not in tab order
       const tabContent = document.createElement("div");
       tabContent.classList.add("tab-content");
 
@@ -509,6 +516,7 @@ class wmTabs {
       tabButton.setAttribute("role", "tab"); // ARIA role for tab button
       tabButton.setAttribute("aria-controls", tabPanel.id);
       tabButton.setAttribute("aria-selected", "false"); // Not selected initially
+      tabButton.setAttribute("tabindex", "-1"); // Initially not in tab order (only active tab will have tabindex="0")
       const childNodes = Array.from(tabButton.childNodes);
       childNodes.forEach(node => {
         if (node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() !== "") {
@@ -675,12 +683,16 @@ class wmTabs {
         } else if (event.key === "ArrowLeft") {
           event.preventDefault();
           this.focusPreviousTab();
-        } else if (event.key === "Tab") {
-          if (!event.shiftKey) {
-            event.preventDefault();
-            this.focusFirstTabbableElementOrNextTab(tab);
-          }
+        } else if (event.key === "Home") {
+          event.preventDefault();
+          this.tabs[0].button.focus();
+          this.updateTabindexValues();
+        } else if (event.key === "End") {
+          event.preventDefault();
+          this.tabs[this.tabs.length - 1].button.focus();
+          this.updateTabindexValues();
         }
+        // Tab key is NOT intercepted - browser handles it natively via tabindex values
       });
 
       if (this.settings.triggerEvent === "hover") {
@@ -728,6 +740,16 @@ class wmTabs {
     };
     const throttledHandleScroll = wm$.throttle(handleScroll, 250);
     this.elements.nav.addEventListener("scroll", throttledHandleScroll);
+  }
+  addContentScrollReset() {
+    // When focus moves to an element inside the overflow:hidden .tabs-content container,
+    // the browser may set scrollLeft/scrollTop to bring the focused element into view.
+    // This fights with the translateX positioning and makes content disappear.
+    // Reset scroll position whenever the browser tries to scroll the content container.
+    this.elements.tabsContent.addEventListener("scroll", () => {
+      this.elements.tabsContent.scrollLeft = 0;
+      this.elements.tabsContent.scrollTop = 0;
+    });
   }
   addTabNavigationClickEvent() {
     this.elements.indicatorStart.addEventListener("click", () => {
@@ -1209,6 +1231,8 @@ class wmTabs {
         tab.selectItem?.classList.remove("active");
       }
     });
+    // Update tabindex values so only the active tab is in the tab order
+    this.updateTabindexValues();
 
     // Store the URL update decision before modifying setInitialUrl
     const shouldUpdateUrl = this.settings.updateUrl && this.settings.setInitialUrl;
@@ -1228,7 +1252,12 @@ class wmTabs {
       });
     }
 
-    this.activeTab.panel.focus();
+    // Only focus the panel when a user actively interacts with a tab (click or keyboard)
+    // Skip during initialization to prevent the page from scrolling to the tabs on load
+    const isTabButtonFocused = this.tabs.some(tab => tab.button === document.activeElement);
+    if (this.hasLoaded && !isTabButtonFocused) {
+      this.activeTab.panel.focus({preventScroll: true});
+    }
     wm$?.emitEvent(`${wmTabs.pluginTitle}:afterOpenTab`, {
       tabId: tabId,
       instance: this,
@@ -1240,6 +1269,7 @@ class wmTabs {
     if (focusedIndex !== -1) {
       const nextIndex = (focusedIndex + 1) % this.tabs.length;
       this.tabs[nextIndex].button.focus();
+      this.updateTabindexValues();
     }
   }
   focusPreviousTab() {
@@ -1247,26 +1277,27 @@ class wmTabs {
     if (focusedIndex !== -1) {
       const prevIndex = (focusedIndex - 1 + this.tabs.length) % this.tabs.length;
       this.tabs[prevIndex].button.focus();
+      this.updateTabindexValues();
     }
   }
   getFocusedTabIndex() {
     return this.tabs.findIndex(tab => tab.button === document.activeElement);
   }
-  focusFirstTabbableElementOrNextTab(tab) {
-    const panel = tab.panel;
-    const index = this.tabs.findIndex(t => t === tab);
-    const tabbableSelector = 'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])';
-    const tabbableElements = panel.querySelectorAll(tabbableSelector);
-
-    if (tabbableElements.length > 0) {
-      tabbableElements[0].focus();
-    } else {
-      this.focusNextTabFromIndex(index);
-    }
+  updateTabindexValues() {
+    // Set tabindex="0" on the active tab button (making it the single tab stop)
+    // Set tabindex="-1" on all other tab buttons (removing them from tab order)
+    this.tabs.forEach(tab => {
+      if (tab === this.activeTab) {
+        tab.button?.setAttribute("tabindex", "0");
+      } else {
+        tab.button?.setAttribute("tabindex", "-1");
+      }
+    });
   }
-  focusNextTabFromIndex(currentIndex) {
-    const nextIndex = (currentIndex + 1) % this.tabs.length;
-    this.tabs[nextIndex].button.focus();
+  isEventFromNestedTabs(event) {
+    // Check if the event target is inside a child tabs instance (not this one)
+    const closestTabs = event.target.closest('[data-wm-plugin="tabs"]');
+    return closestTabs && closestTabs !== this.el;
   }
   removeGlobalAnimations() {
     // Select all elements with any of the specified classes
@@ -1477,6 +1508,9 @@ class wmTabs {
 
       const href = clickedElement.getAttribute("href");
       if (!href) return;
+
+      // If the link is inside a nested (child) tabs instance, let that instance handle it
+      if (this.el.contains(clickedElement) && this.isEventFromNestedTabs(event)) return;
 
       // Create URL objects for comparison
       const linkUrl = new URL(href, window.location.href);
