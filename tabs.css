@@ -103,6 +103,7 @@ body:not(.sqs-edit-mode-active)
 .wm-tabs[data-navigation-type="horizontal"] .tab-panel.active,
 .wm-tabs[data-navigation-type="vertical"] .tab-panel.active,
 .wm-tabs[data-navigation-type="select"] .tab-panel.active {
+  outline: none;
   visibility: visible;
   opacity: 1;
 }
