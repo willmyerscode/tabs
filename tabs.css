@@ -837,6 +837,11 @@ body.sqs-edit-mode-active
   width:inherit;
 }
 
+/*Prevent overflow with Tabs in classic editor section*/
+.content-wrapper:has(.sqs-grid-12 .wm-tabs) {
+  box-sizing: border-box;
+}
+
 
 /*Default Settings*/
 .wm-tabs {
