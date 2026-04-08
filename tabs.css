@@ -842,6 +842,16 @@ body.sqs-edit-mode-active
   box-sizing: border-box;
 }
 
+/*Better Image Rendering in Tabs for Content Fit Images*/
+.fe-block [data-wm-plugin="tabs"] .fe-block .sqs-block[data-definition-name="website.components.imageFluid"] .design-layout-fluid.image-component-container-fit .fluid-image-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.fe-block [data-wm-plugin="tabs"] .fe-block .sqs-block[data-definition-name="website.components.imageFluid"] .design-layout-fluid.image-component-container-fit .fluid-image-container .content-fit img {
+  position: absolute !important;
+}
+
 
 /*Default Settings*/
 .wm-tabs {
