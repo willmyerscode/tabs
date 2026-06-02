@@ -687,6 +687,24 @@ body:not(.sqs-edit-mode-active)
   overflow-y: auto;
   padding: 4px 0px;
   background: var(--select-menu-background-color);
+  /* Always show the scrollbar so overflow is obvious (Firefox) */
+  scrollbar-width: var(--select-scrollbar-width, thin);
+  scrollbar-color: var(--select-scrollbar-thumb-color, hsla(var(--wm-text-hsl), 0.4))
+    var(--select-scrollbar-track-color, transparent);
+}
+/* Always show the scrollbar so overflow is obvious (WebKit/Chrome/Safari) */
+.select-navigation .select-items-wrapper::-webkit-scrollbar {
+  width: var(--select-scrollbar-size, 8px);
+}
+.select-navigation .select-items-wrapper::-webkit-scrollbar-track {
+  background: var(--select-scrollbar-track-color, transparent);
+}
+.select-navigation .select-items-wrapper::-webkit-scrollbar-thumb {
+  background: var(--select-scrollbar-thumb-color, hsla(var(--wm-text-hsl), 0.4));
+  border-radius: var(--select-scrollbar-size, 8px);
+}
+.select-navigation .select-items-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--select-scrollbar-thumb-hover-color, hsla(var(--wm-text-hsl), 0.6));
 }
 .select-navigation button.select-item {
   text-align: start;
@@ -938,6 +956,13 @@ body.sqs-edit-mode-active
 
   --select-button-padding-y: 8px;
   --select-button-padding-x: 12px;
+
+  --select-navigation-max-height: 50vh;
+  --select-scrollbar-size: 8px;
+  --select-scrollbar-width: thin;
+  --select-scrollbar-thumb-color: hsla(var(--wm-text-hsl), 0.4);
+  --select-scrollbar-thumb-hover-color: hsla(var(--wm-text-hsl), 0.6);
+  --select-scrollbar-track-color: transparent;
 
   /*Content*/
   --tab-content-padding-start: 8px;
