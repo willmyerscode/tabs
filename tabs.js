@@ -183,8 +183,8 @@ class wmTabs {
     }
 
     async function handleDOMReady() {
-      const sections = document.querySelector("#sections");
-      const lastSection = document.querySelector("#sections > section:last-child .content-wrapper");
+      const sections = document.querySelector("#sections, #page-regions");
+      const lastSection = sections?.querySelector(".page-section:last-of-type .content-wrapper");
 
       let originalParent = this.el.parentNode;
       let wasAppended = false;
@@ -1557,3 +1557,4 @@ class wmTabs {
   };
   window.wmTabs.init();
 })();
+
