@@ -881,6 +881,20 @@ body.sqs-edit-mode-active
   position: absolute !important;
 }
 
+/* Nested Fluid Engine blocks lose Squarespace's measured Fit dimensions.
+   Keep the clipping box at the image's aspect ratio so its corners and mask
+   follow the visible image, including after a resize or a hidden tab opens. */
+@supports (container-type: size) {
+  .fe-block [data-wm-plugin="tabs"] .fe-block .sqs-block[data-definition-name="website.components.imageFluid"] .design-layout-fluid.image-component-container-fit .fluid-image-animation-wrapper {
+    container-type: size;
+  }
+
+  .fe-block [data-wm-plugin="tabs"] .fe-block .sqs-block[data-definition-name="website.components.imageFluid"] .design-layout-fluid.image-component-container-fit .fluid-image-container {
+    width: min(100cqw, calc(100cqh * (var(--image-component-native-aspect-ratio)))) !important;
+    height: min(100cqh, calc(100cqw / (var(--image-component-native-aspect-ratio)))) !important;
+  }
+}
+
 
 /*Default Settings*/
 .wm-tabs {
