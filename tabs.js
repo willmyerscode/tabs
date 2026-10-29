@@ -733,6 +733,15 @@ class wmTabs {
     });
 
     this.elements.selectNavigation.addEventListener("click", toggleMenu);
+
+    // Close the menu when tapping or clicking anywhere outside of it
+    this.handleOutsideSelectClick = e => {
+      const selectNavigation = this.elements.selectNavigation;
+      if (!selectNavigation.classList.contains("open")) return;
+      if (selectNavigation.contains(e.target)) return;
+      selectNavigation.classList.remove("open");
+    };
+    document.addEventListener("pointerdown", this.handleOutsideSelectClick);
   }
   addTabNavigationScrollEvent() {
     const handleScroll = () => {
@@ -1344,6 +1353,10 @@ class wmTabs {
    * Destroy this instance and restore/remove sections appropriately
    */
   destroy() {
+    if (this.handleOutsideSelectClick) {
+      document.removeEventListener("pointerdown", this.handleOutsideSelectClick);
+    }
+
     // Handle moved sections - restore to original positions
     if (wmTabs.originalPositions && wmTabs.originalPositions.size > 0) {
       // Get sections that belong to this instance
